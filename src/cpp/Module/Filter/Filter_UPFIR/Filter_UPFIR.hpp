@@ -29,9 +29,9 @@ protected:
 	virtual void _filter(const R *X_N1, R *Y_N2, const int frame_id);
 
 private:
-	const int                   F;       // Upsampling Factor
-	std::vector<std::vector<R>> H;       // Impulse response
-	std::vector<std::shared_ptr<fltr<R>>>        flt_bank;// Filter bank
+	const int                             F;       // Upsampling Factor
+	std::vector<std::vector<R>>           H;       // Impulse response
+	std::vector<std::shared_ptr<fltr<R>>> flt_bank;// Filter bank
 };
 }
 }
