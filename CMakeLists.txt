@@ -21,11 +21,11 @@ find_package(AFF3CT CONFIG 2.3.2 REQUIRED)
 
 add_subdirectory(py_aff3ct/lib/pybind11)
 
-file(GLOB_RECURSE SRC_FILES_CO ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
+file(GLOB_RECURSE SRC_FILES_CO ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/*)
 file(GLOB_RECURSE PA_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/py_aff3ct/src/*)
 
 # `pybind11_add_module` is a wrapper of the CMake `add_library` function
-pybind11_add_module(eirballoon-lib MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/Wrapper/wrapper.cpp ${SRC_FILES_CO})
+pybind11_add_module(eirballoon-lib MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/Wrapper/wrapper.cpp ${SRC_FILES_CO})
 set_target_properties(eirballoon-lib PROPERTIES
                                            OUTPUT_NAME eirballoon
                                            POSITION_INDEPENDENT_CODE ON) # set -fpic
