@@ -26,9 +26,9 @@ class Display(Py_Module):
 
 		self.fig   = plt.figure()
 		self.ax    = self.fig.add_subplot(1, 1, 1)
-		self.line, = self.ax.plot([], '.b')
+		self.line, = self.ax.plot([], '-b')
 		self.i_plt = 0
 		plt.xlabel("Real part")
 		plt.ylabel("Imaginary part")
-		#plt.ylim(-2,2)
-		#plt.xlim(-2,2)
+		plt.ylim(-2,2)
+		plt.xlim(-2,2)
