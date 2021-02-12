@@ -24,7 +24,7 @@ struct USRP_params
 {
 	int N                      = 0;
 	bool threaded              = false;
-	uint64_t fifo_size         = uint64_t(10000000000);
+	uint64_t fifo_size         = uint64_t(10000000);
 	std::string type           = "USRP";
 	std::string usrp_addr      = "";
 	double clk_rate            = 0; // If clk_rate is 0,the default clock rate is used.
@@ -42,7 +42,7 @@ struct USRP_params
 	double tx_rate             = 0; // if tx_rate is not overriden, tx is disabled
 	std::string tx_subdev_spec = "A:0";
 	std::string tx_antenna     = "TX/RX";
-	double tx_freq             = 1090e6;
+	double tx_freq             = 833e6;
 	double tx_gain             = 10;
 
 	USRP_params();

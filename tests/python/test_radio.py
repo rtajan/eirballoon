@@ -14,6 +14,8 @@ usrp_params.threaded   = True
 usrp_params.usrp_addr  = "type=b100"
 usrp_params.rx_enabled = True
 usrp_params.rx_rate    = 1e6
+usrp_params.fifo_size = 10000
+usrp_params.rx_antenna = "TX/RX"
 
 radio   = eirballoon.radio.Radio_USRP(usrp_params)
 display = py_display.Display(2048)

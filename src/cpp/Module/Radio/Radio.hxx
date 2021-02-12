@@ -45,7 +45,7 @@ Radio<R>
 	auto p1s_X_N1 = this->template create_socket_in <R>(p1, "X_N1", 2 * N);
 	this->create_codelet(p1, [p1s_X_N1](Module &m, Task &t, const size_t frame_id) -> int
 	{
-		static_cast<Radio<R>&>(m).send(static_cast<R*>(t[p1s_X_N1].get_dataptr()), frame_id);
+		static_cast<Radio<R>&>(m)._send(static_cast<R*>(t[p1s_X_N1].get_dataptr()), frame_id);
 		return 0;
 	});
 
