@@ -5,17 +5,31 @@ import numpy as np
 
 class source_img(Py_Module):
 
-    def imgToBits(self,s_out):
+    def sendImg(self):
         Bytes = np.fromfile(self.path,dtype="uint8")
         bits = np.unpackbits(Bytes)
         self.bmax = len(bits)
-        s_out=bits[self.offset:min(self.offset+self.N,self.bmax)]
-        self.offset=self.offset+self.N
-        if (self.offset>self.bmax):
+        s_out=bits[self.offset:min(self.offset+self.N,self.bmax)].astype('int32')
+        
+        if (self.offset+self.N>self.bmax):
+            s_out = np.concatenate([s_out,[0]*(self.N-(self.bmax-self.offset))])
             self.offset = 0
-            print("-------------------------------------------------")
-        print(s_out)
-        print(len(s_out))
+        else:   
+            self.offset=self.offset+self.N
+        return s_out
+    
+    def sendPream(self):
+        s_out = np.array([1]*self.N,dtype='int32')
+        self.pream = True
+        return s_out
+
+    def imgToBits(self,s_out):
+        if (self.pream):
+            s_out[:] = self.sendImg()[:]
+        else:
+            s_out[:] = self.sendPream()[:]
+
+            
         return 0
 
     def __init__(self, path,N):
@@ -23,6 +37,7 @@ class source_img(Py_Module):
         self.name = "py_Source_image"
         self.path = path
         self.N=N
+        self.pream = True
         self.offset = 0
         t_source = self.create_task('generate')
         s_out = self.create_socket_out(t_source, 'img',N,np.int32)
