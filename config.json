@@ -1,0 +1,35 @@
+{
+    "record_name": "record.bin",
+    "pip": {
+        "Aff3ct2Tx": "pip1",
+        "Rx2Aff3ct": "pip1"
+    },
+    "Aff3ct": {
+        "n_threads": "1",
+        "n_frames": "1",
+        "K": "128",
+        "N": "256",
+        "fe": "100",
+        "seed": "0",
+        "nb": "2",
+        "alpha": "0.40",
+        "grp_delay": "20",
+        "osf": "8",
+        "lenHeader": "64",
+        "payloadSize": "3328"
+    },
+    "hackRF": {
+        "Fp": "869.475e6",
+        "samp_rate": "4e6",
+        "Tx": {
+            "gain": "14",
+            "IFgain": "47",
+            "BBgain": "62"
+        },
+        "Rx": {
+            "gain": "0",
+            "IFgain": "30",
+            "BBgain": "30"
+        }
+    }
+}
