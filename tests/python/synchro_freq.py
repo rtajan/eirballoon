@@ -12,6 +12,9 @@ from scipy.signal import welch
 import matplotlib.pyplot as plt
 import math
 
+
+
+
 class Frequency_Synchronizer(Py_Module):
 
     def pWelch(self,s_recv,M,overlap,Nfft):
