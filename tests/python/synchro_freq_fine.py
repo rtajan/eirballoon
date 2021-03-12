@@ -1,40 +1,40 @@
+from numba import jit
+from py_aff3ct.module.py_module import Py_Module
 import fairepream
 from math import *
 import numpy as np
 import sys
 sys.path.insert(0, '../../build/lib')
-from py_aff3ct.module.py_module import Py_Module
-
 
 
 class synchro_freq_fine(Py_Module):
+    @jit(nopython=True)
+    def func_(s_in, s_out, previousSample, phase, loopFiltState, DDSPreviousInp, IntegFiltState, gI, gP):
+        for k in range(len(s_in[0, :])//2):
+            phErr = np.sign(np.real(previousSample))*np.imag(previousSample) - \
+                np.sign(np.imag(previousSample))*np.real(previousSample)
+            c = cos(phase)
+            s = sin(phase)
+            t = s_in[0, 2*k:2*k+2]
+            s_out[0, 2*k] = t[0]*c-t[1]*s
+            s_out[0, 2*k+1] = t[0]*s+t[1]*c
+
+            loopFiltOut = phErr*gI + loopFiltState
+            loopFiltState = loopFiltOut
+
+            DDSout = DDSPreviousInp + IntegFiltState
+            IntegFiltState = DDSout
+            DDSPreviousInp = phErr * gP+loopFiltOut
+
+            phase = -DDSout
+            previousSample = s_out[0, 2*k] + 1j * s_out[0, 2*k+1]
+        return previousSample, phase, loopFiltState, DDSPreviousInp, IntegFiltState
+        
 
     def func(self, s_in, s_out):
-        ylreal = s_in[0,::2]
-        ylimag = s_in[0,1::2]
-        yl = np.array(ylreal + 1j *ylimag,dtype=np.complex64)
-        y = np.zeros((1,self.N//2),dtype=np.complex64)
-        for k in range(self.N//2):
-            phErr = np.sign(np.real(self.previousSample))*np.imag(self.previousSample)-np.sign(np.imag(self.previousSample))*np.real(self.previousSample)
-            y[0,k] = yl[k]*np.exp(1j*self.phase)
-
-            loopFiltOut = phErr*self.gI + self.loopFiltState
-            self.loopFiltState = loopFiltOut
-
-            DDSout = self.DDSPreviousInp + self.IntegFiltState
-            self.IntegFiltState= DDSout
-            self.DDSPreviousInp = phErr * self.gP+loopFiltOut
-
-            self.phase = -DDSout
-            self.previousSample = y[0,k]
-        yl_sync = np.zeros(2*len(y[0]),dtype=np.float32)
-        yl_sync[0::2] = np.real(y)
-        yl_sync[1::2] = np.imag(y)
-
-        s_out[:]=yl_sync[:]
-
+        self.previousSample, self.phase, self.loopFiltState, self.DDSPreviousInp, self.IntegFiltState = synchro_freq_fine.func_(
+            s_in, s_out, self.previousSample, self.phase, self.loopFiltState, self.DDSPreviousInp, self.IntegFiltState, self.gI, self.gP)
         return 0
-
 
     def __init__(self, fse, N):
         Py_Module.__init__(self)
@@ -44,7 +44,8 @@ class synchro_freq_fine(Py_Module):
         self.zeta = sqrt(2)/2
         self.Kp = 2
         self.SPS = fse
-        self.teta = (self.Bn * self.SPS)/((self.zeta + 0.25/self.zeta)*self.SPS)
+        self.teta = (self.Bn * self.SPS) / \
+        ((self.zeta + 0.25/self.zeta)*self.SPS)
         self.d = 1+2*self.zeta*self.teta+self.teta**2
         self.gI = (4*(self.teta**2)/self.d)/(self.Kp*self.SPS)
         self.gP = (4*(self.teta*self.zeta)/self.d)/(self.Kp*self.SPS)
