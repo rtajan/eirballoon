@@ -1,3 +1,13 @@
+#####################################
+#
+#preamble has method create_preamble to create an n-sized preamble 
+## method insert_preamble to encapsulate a frame (input: np.float32 --> output: np.float32) 
+## and method remove_preamble 
+#
+#####################################
+
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import sys  
@@ -9,29 +19,41 @@ from py_aff3ct.module.py_module import Py_Module
 
 class preamble(Py_Module):
 
-    def insert_preamble(self, n,  in_, out_):
-        pream=np.zeros((n,1),dtype=np.complex64)
-        for i in range(n):
-            pream[i]=np.exp(1j*2*np.pi*(i%4)/4) #1 1j -1 ... 
-        print(pream)
-        out_=np.concatenate((pream, in_), axis=0)
-        return 0
 
-    def remove_preamble(self, n, in_, out_):
-        out_=in_[n:]
-        return 0
+    def create_preamble(self):        
+        pream_cp=np.zeros((self.n,1),dtype=np.complex64)
+        pream=np.zeros((2*self.n,1), dtype=np.int32)
+        for i in range(n):
+            pream_cp[i]=np.exp(1j*2*np.pi*(i%4)/4) #1 1j -1 ... 
+            pream[2*i]=np.real(pream_cp[i])
+            pream[2*i+1]=np.imag(pream_cp[i])
+
+        return np.transpose(pream)
+
+    def insert_preamble(self, in_):
+        pream=self.create_preamble()
+        out_=np.concatenate((np.transpose(pream),np.transpose(in_)), axis=0)
+        return np.transpose(out_)
+   
+
+    def remove_preamble(self, in_):
+        return in_[self.n:]
 
     def __init__(self,n): 
         Py_Module.__init__(self)
         self.name = 'Preamble_Generator'
         self.n = n
+        t_create_pream=self.create_task('create_preamble')
+        self.create_codelet(t_create_pream, lambda slf, lsk, fid:self.create_preamble())
+
+
         t_ins_pream = self.create_task('insert_preamble')
-        sin = self.create_socket_in(t_ins_pream, "s_in",n,np.complex64)
-        sout = self.create_socket_out(t_ins_pream, "s_out", n, np.complex64)
-        self.create_codelet(t_ins_pream,lambda slf, lsk, fid: self.insert_preamble(lsk[sin],lsk[sout]))
+        sin = self.create_socket_in(t_ins_pream, "s_in",n,np.float32)
+        sout = self.create_socket_out(t_ins_pream, "s_out", n, np.float32)
+        self.create_codelet(t_ins_pream,lambda slf, lsk, fid: self.insert_preamble(lsk[sin], lsk[sout]))
 
         t_rem_pream=self.create_task('remove_preamble')
-        sin=self.create_socket_in(t_rem_pream, "s_in",n,np.complex64)
-        sout=self.create_socket_out(t_rem_pream, "s_out",n,np.complex64)
+        sin=self.create_socket_in(t_rem_pream, "s_in",n,np.float32)
+        sout=self.create_socket_out(t_rem_pream, "s_out",n,np.float32)
         self.create_codelet(t_rem_pream, lambda slf, lsk, fid: self.remove_preamble(lsk[sin], lsk[sout]))
 
