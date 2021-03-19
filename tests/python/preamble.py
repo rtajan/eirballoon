@@ -21,9 +21,9 @@ class preamble(Py_Module):
 
 
     def create_preamble(self):        
-        pream_cp=np.zeros((self.n,1),dtype=np.complex64)
-        pream=np.zeros((2*self.n,1), dtype=np.int32)
-        for i in range(n):
+        pream_cp=np.zeros((self.len_pream,1),dtype=np.complex64)
+        pream=np.zeros((2*self.len_pream,1), dtype=np.int32)
+        for i in range(self.len_pream):
             pream_cp[i]=np.exp(1j*2*np.pi*(i%4)/4) #1 1j -1 ... 
             pream[2*i]=np.real(pream_cp[i])
             pream[2*i+1]=np.imag(pream_cp[i])
@@ -39,21 +39,22 @@ class preamble(Py_Module):
     def remove_preamble(self, in_):
         return in_[self.n:]
 
-    def __init__(self,n): 
+    def __init__(self,len_pream,len_frame ): 
         Py_Module.__init__(self)
         self.name = 'Preamble_Generator'
-        self.n = n
+        self.len_pream = len_pream
+        self.len_frame=len_frame
         t_create_pream=self.create_task('create_preamble')
         self.create_codelet(t_create_pream, lambda slf, lsk, fid:self.create_preamble())
 
 
         t_ins_pream = self.create_task('insert_preamble')
-        sin = self.create_socket_in(t_ins_pream, "s_in",n,np.float32)
-        sout = self.create_socket_out(t_ins_pream, "s_out", n, np.float32)
+        sin = self.create_socket_in(t_ins_pream, "s_in",self.len_frame,np.float32)
+        sout = self.create_socket_out(t_ins_pream, "s_out", self.len_frame+self.len_pream, np.float32)
         self.create_codelet(t_ins_pream,lambda slf, lsk, fid: self.insert_preamble(lsk[sin], lsk[sout]))
 
         t_rem_pream=self.create_task('remove_preamble')
-        sin=self.create_socket_in(t_rem_pream, "s_in",n,np.float32)
-        sout=self.create_socket_out(t_rem_pream, "s_out",n,np.float32)
+        sin=self.create_socket_in(t_rem_pream, "s_in",self.len_frame+self.len_pream,np.float32)
+        sout=self.create_socket_out(t_rem_pream, "s_out",self.len_frame,np.float32)
         self.create_codelet(t_rem_pream, lambda slf, lsk, fid: self.remove_preamble(lsk[sin], lsk[sout]))
 
