@@ -9,10 +9,13 @@ class Mean_Agc(Py_Module):
 
     def ampli(self, amp_in, amp_out):
         
-        y = np.mean(abs(amp_in[0,::2] + 1j*amp_in[0,1::2]))
-        gain = np.sqrt(self.ref)/y
-        amp_out[:]= amp_in[:]*gain
-        
+        y = np.mean((amp_in[0,::2]*amp_in[0,::2] + amp_in[0,1::2]*amp_in[0,1::2]))
+        if(y>1e-8):
+            gain_= self.ref/np.sqrt(y)
+        else:
+            gain_= 0
+        self.gain = gain_ * 0.9+0.1*self.gain
+        amp_out[:]= amp_in[:]*self.gain
 
         return 0
 
