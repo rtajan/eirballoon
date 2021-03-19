@@ -5,6 +5,7 @@ sys.path.insert(0, '../../src/python')
 import py_display
 import py_aff3ct
 import eirballoon
+import display_info
 import test_ampli
 import numpy as np
 import source_img
@@ -29,6 +30,10 @@ mod = py_aff3ct.module.modem.Modem_BPSK_fast(2*N)
 h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.5,2,20)
 flt = eirballoon.filter.Filter_UPFIR(2*N,h,2)
 amp = test_ampli.test_ampli(0.7,4*N)
+inf = display_info.display_info()
+# inf.register_input("source",np.int32,N)
+inf.bind_display(src['generate::U_K' ])
+inf.done()
 
 usrp_params = eirballoon.radio.USRP_params()
 usrp_params.N          = 2*N
@@ -45,6 +50,7 @@ display = py_display.Display(4*N)
 
 
 enc['encode::U_K'].bind(src['generate::U_K' ])
+# inf['display::source'].bind(src['generate::U_K' ])
 mod['modulate::X_N1'].bind(enc['encode::X_N'])
 flt[  'filter::X_N1'].bind(mod['modulate::X_N2'])
 amp['amplify::amp_in'].bind(flt['filter::Y_N2'])
