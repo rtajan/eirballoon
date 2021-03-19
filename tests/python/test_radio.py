@@ -7,6 +7,7 @@ import eirballoon
 import numpy as np
 import matplotlib.pyplot as plt
 import py_display
+import display_info
 import synchro_freq_fine
 import signal
 import mean_agc
@@ -48,6 +49,12 @@ sync_fine = synchro_freq_fine.synchro_freq_fine(fse,N*2)
 sync_fine.name="Sfr"
 dec = py_aff3ct.module.decoder.Decoder_repetition_std(N,N*2)
 mdm = py_aff3ct.module.modem.Modem_BPSK_fast(N*fse)
+info = display_info.display_info()
+
+info.bind_display(noise['estimate::cp'])
+info.bind_display(noise["estimate::snr"])
+info.done()
+
 
 # pream = sync_pream.sync_pream(128,N)
 
