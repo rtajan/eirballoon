@@ -13,14 +13,22 @@ class Estimateur_bruit(Py_Module):
         M4 = np.mean(abs(y[0,:]**4))
         Es = sqrt(abs(2*(M2**2)-M4))
         N0 = abs(M2-Es)
-        cp[0,:] = N0/2
-        snr[0,:] = 10*log10(Es/N0)
+        cp[:,0] = N0/2
+        if M2< 1e-6:
+            snr_= 0
+        else:
+            snr_ = Es/N0
+        self.prev_snr = self.alpha*snr_+(1-self.alpha)*self.prev_snr
+        snr[:,0] = 10*log10(self.prev_snr)
+        print("Es ",Es ,"\nN0 ",N0,"\nM2 ",M2,"\nSnr ",snr[:,0])
         return 0
 
-    def __init__(self, K):
+    def __init__(self, K, alpha):
         # init
         Py_Module.__init__(self)
         self.name = "est_noise"
+        self.alpha = alpha
+        self.prev_snr = 0
         t_estimate = self.create_task('estimate')
         sin = self.create_socket_in(t_estimate, "y", K, np.float32)
         sout1 = self.create_socket_out(t_estimate, "cp", 1, np.float32)
