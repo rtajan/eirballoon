@@ -17,6 +17,7 @@
 #include "Module/Synchronizer/Synchronizer_timing/Synchronizer_Gardner.hpp"
 
 #include "Module/Radio/Radio.hpp"
+#include "Module/Interrupteur/Interrupteur.hpp"
 #ifdef LINK_UHD
 #include "Module/Radio/Radio_USRP/Radio_USRP.hpp"
 #endif //LINK_UHD
@@ -64,6 +65,10 @@ PYBIND11_MODULE(eirballoon, m){
 
 	py::module_ m_radio = m.def_submodule("radio");
 	py::class_<aff3ct::module::Radio<float>>(m_radio,"Radio",py_aff3ct_module);
+
+	py::module_ m_itr = m.def_submodule("interrupteur");
+	py::class_<aff3ct::module::Interrupteur<int, float>, aff3ct::module::Module>(m_itr,"Interrupteur")
+		.def(py::init<const int>(), "N"_a);
 
 	#ifdef LINK_UHD
 	
