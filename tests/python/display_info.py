@@ -7,17 +7,25 @@ sys.path.insert(0, '../../build/lib')
 
 class display_info(Py_Module):
 
-    def display(self,lsk):
+    def title(self,lsk):
         if self.init:
-            print("|----------"*len(lsk),"|\n")
-            # for i in lsk:
-                # print("|"," "*(10-len(i.name)),i.name)
-            print("|\n")
-            print("|----------"*len(lsk),"|\n")
+            print(self.sepa[:-1])
+            for i in range(len(lsk)):
+                print("|"," "*(18-len(self.socket_name[i])),self.socket_name[i],end="")
+            print("|")
+            print(self.sepa[:-1])
             self.init=False
-        for i in lsk:
-            print("|"," "*(10-len(str(i[0,0]))),i[0,0],end='')
-        print("|\r",end='')
+
+    def display(self,lsk):
+        if self.frame % 50 == 0:
+            self.title(lsk)
+            formatted_str = "%21.3f"
+            for i in range(len(lsk)-1):
+                #print(" "*(18-len(str(lsk[i][0,0]))),lsk[i][0,0],end='|')
+                print(formatted_str%lsk[i][0,0],end='|')
+            print(formatted_str%lsk[-1][0,0],end='\r')
+            self.frame = 0
+        self.frame = self.frame +1
         return 0
 
     def bind_display(self,sck):
@@ -26,8 +34,9 @@ class display_info(Py_Module):
         if shp[1] > 1:
             raise RuntimeError
         s = self.create_socket_in(self("display"),sck.name,shp[0]*shp[1],tp)
+        self.socket_name.append(sck.name)
         self("display").sockets[s].bind(sck)
-
+        self.sepa = self.sepa +20*"-"+"|"
     # def register_input(self,nom,type,N):
     #     self.create_socket_in(self('display'),nom,N,type)
 
@@ -45,3 +54,5 @@ class display_info(Py_Module):
         t_dis = self.create_task('display')
         self.frame = 0
         self.init = True
+        self.socket_name = []
+        self.sepa = "#"
