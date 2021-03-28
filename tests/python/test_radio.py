@@ -16,14 +16,14 @@ import estimateur_bruit
 process=None
 
 def signal_handler(sig, frame):
-    print('You pressed Ctrl+C!')
+    #print('You pressed Ctrl+C!')
     sequence.show_stats()
     process.send_signal(signal.SIGINT)
     # raise KeyboardInterrupt
 
 N=1024
 fse = 2
-fech = 500e3
+fech = 1e6
 usrp_params = eirballoon.radio.USRP_params()
 usrp_params.N          = N*fse
 usrp_params.threaded   = True
@@ -49,10 +49,15 @@ sync_fine = synchro_freq_fine.synchro_freq_fine(fse,N*2)
 sync_fine.name="Sfr"
 dec = py_aff3ct.module.decoder.Decoder_repetition_std(N,N*2)
 mdm = py_aff3ct.module.modem.Modem_BPSK_fast(N*fse)
+snk = py_aff3ct.module.sink.Sink_user_binary(N, 'toto.dat')
 info = display_info.display_info()
+itr = eirballoon.interrupteur.Interrupteur(N*fse*2)
 
+info.bind_display(stm['synchronize::MU'])
 info.bind_display(noise['estimate::cp'])
 info.bind_display(noise["estimate::snr"])
+info.bind_display(amp["amplify::gain_out"])
+info.bind_display(amp["amplify::itr"])
 info.done()
 
 
@@ -61,9 +66,11 @@ info.done()
 
 
 amp["amplify::amp_in"].bind(radio["receive::Y_N1"])
+itr["select::bln"].bind(amp["amplify::itr"])
+itr["select::X_N"].bind(amp["amplify::amp_out"])
 # sync_freq["sync::sync_in"].bind(amp['amplify::amp_out'])
 # flt['filter::X_N1'].bind(sync_freq["sync::sync_out"])
-flt['filter::X_N1'].bind(amp['amplify::amp_out'])
+flt['filter::X_N1'].bind(itr["select::Y_N"])
 # sync_freq['sync::sync_in'].bind(flt['filter::Y_N2'])
 # stm['synchronize::X_N1'].bind(sync_freq['sync::sync_out'])
 stm['synchronize::X_N1'].bind(flt['filter::Y_N2'])
@@ -73,20 +80,21 @@ stm['extract::B_N1'].bind(stm['synchronize::B_N1'])
 # pream['sync_pream::sync_in'].bind(stm['extract::Y_N2'])
 sync_fine['synchronize::sync_in'].bind(stm['extract::Y_N2'])
 
-# display['plot::x'].bind(sync_fine['synchronize::sync_out'])
+#display['plot::x'].bind(sync_fine['synchronize::sync_out'])
 mdm['demodulate::Y_N1'].bind(sync_fine['synchronize::sync_out'])
 # CP = np.array([[1]],dtype=np.float32)
 noise['estimate::y'].bind(sync_fine['synchronize::sync_out'])
 mdm['demodulate::CP'].bind(noise['estimate::cp'])
 dec['decode_siho::Y_N'].bind(mdm['demodulate::Y_N2'])
-display['plot::x'].bind(sync_fine["synchronize::sync_out"])
+snk['send::V'].bind(dec['decode_siho::V_K'])
+# display['plot::x'].bind(sync_fine["synchronize::sync_out"])
 # dec('decode_siho').debug = True
 # mdm('demodulate').debug = True
 
 
 
 
-sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"),mdm("demodulate"))
+sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"),snk("send"))
 
 # sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"),dec('decode_siho'))
 
@@ -94,7 +102,7 @@ l_tasks = sequence.get_tasks_per_types()
 for lt in l_tasks:
     for t in lt:
         t.stats = True
-        # t.debug = True
+        #t.debug = True
         t.set_debug_limit(1)
 #sequence . export_dot("seq.dot")
 signal.signal(signal.SIGINT, signal_handler)
