@@ -23,6 +23,8 @@
 
 import os
 import time 
+from datetime import datetime
+import json
 
 class amp:
     power = 0
@@ -50,39 +52,42 @@ class amp:
 class start:
 
     def __init__(self):
+        #creation du fichier log
+        self.fichier_log=open("./log_tasks.txt", "w+")
+        self.fichier_log.write("Starting Task Scheduling Log at "+time.time())
         #on retrouve le repertoire eirballoon
-        path_tmp = os.path.dirname(os.path.abspath(__file__))
-        abs_path = path_tmp.split("/")
+        abs_path = os.path.dirname(os.path.abspath(__file__)).split("/")
         while abs_path[-1:][0]!="eirballoon":
-            print(abs_path)
             abs_path.pop()
-        print(abs_path)
-        i = 0
         str_abs_path = ""
-        for i in range(len(abs_path)):
-            str_abs_path = "/" + abs_path[i]
+        for i in range(1,len(abs_path)):
+            str_abs_path = str_abs_path + "/" + abs_path[i]
         str_abs_path = str_abs_path + "/"
-        print (str_abs_path)
-
-
-    def tube_creator(path):
+        self.path=str_abs_path
+        
+    def tube_creator(self, path):
         os.mkfifo(path)
+
         return 1
 
     
 
-    def take_a_photo(file_path):
+    def take_a_photo(self, file_path):
         #prendre une photo
-        print(photo)
+
+        self.ficher_log.write(datetime.now.strftime("%H:%M:%S")+": Taking photo")
+        
         return 1 #return file_name
 
-    def record_video(file_path):
+    def record_video(self,file_path, vid_sec):
         #prendre une video
-        print(video)
+        self.ficher_log.write(datetime.now.strftime("%H:%M:%S")+": Taking video for"+str(vid_sec)+" seconds")
+
         return 1 #return file_name
 
-    def start_aff3ct(file_name):
-        print(affect)
+    def start_aff3ct(self,file_name):
+        self.ficher_log.write(datetime.now.strftime("%H:%M:%S")+": Starting Aff3ct")
+
         #exec aff3ct(path)
         return 1
 
@@ -96,15 +101,20 @@ class start:
 
 def main(): 
     print("démarrage")
-    demarrage = start()
-    ampli = amp()
+    # demarrage = start()
+    # ampli = amp()
+    #create JSON
+
+    #parse
+    #
 
 
 
-main()
 
-    #if __name__ == "__main__":
+    if __name__ == "__main__":
+     #parse JSON file 
      #   print("Les chicots, c'est sacré ! Parce que si j'les lave pas maintenant, dans dix ans, c'est tout à la soupe. Et l'mec qui me fera manger de la soupe il est pas né !")
-      #  main()
-    #else:
-     #   print('Du passé faisons table en marbre.')
+       main()
+    
+    else:
+        print('Du passé faisons table en marbre.')
