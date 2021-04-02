@@ -52,10 +52,9 @@ class preamble(Py_Module):
     def __init__(self,len_pream,len_frame ): 
         Py_Module.__init__(self)
         self.name = 'preamble'
-        self.len_pream = len_pream  
         self.len_frame=len_frame 
 
-        self.header1=self.create_preamble() #creer
+        #self.header1=self.create_preamble() #creer
         self.header=np.array(self.get_header("header.txt")).reshape(1,2*len_pream) #utiliser le preambule dans le fishier header.txt
 
         t_ins_pream = self.create_task('insert_preamble')

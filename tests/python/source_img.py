@@ -11,13 +11,16 @@ class source_img(Py_Module):
         Bytes = np.fromfile(self.path,dtype="uint8")
         bits = np.unpackbits(Bytes)
         self.bmax = len(bits)
-        s_out=self.tabpream + bits[self.offset:min(self.offset+self.N-64,self.bmax)].astype('int32')
+        s_out=bits[self.offset:min(self.offset+self.N,self.bmax)].astype('int32')
+
+        #s_out= np.concatenate([self.tabpream,bits[self.offset:min(self.offset+self.K,self.bmax)]]).astype('int32')
+
         
-        if (self.offset+self.N-64>self.bmax):
-            s_out = np.concatenate([s_out,[0]*(self.N-64-(self.bmax-self.offset))])
+        if (self.offset+self.K>self.bmax):
+            s_out = np.concatenate([s_out,[0]*(self.K-(self.bmax-self.offset))])
             self.offset = 0
         else:   
-            self.offset=self.offset+self.N-64
+            self.offset=self.offset+self.K
         return s_out
     
     def sendPream(self):
@@ -39,9 +42,10 @@ class source_img(Py_Module):
         self.name = "py_Source_image"
         self.path = path
         self.N=N
+        self.K = N
         self.pream = True
         self.offset = 0
-        self.tabpream = fairepream(64)
+        self.tabpream = fairepream.fairepream(128)
         t_source = self.create_task('generate')
         s_out = self.create_socket_out(t_source, 'img',N,np.int32)
 
