@@ -11,11 +11,11 @@ class Display(Py_Module):
 			self.line.set_data(x[0,::2], x[0,1::2])
 			self.fig.canvas.draw()
 			self.fig.canvas.flush_events()
-			plt.pause(0.000000000001)
+			plt.pause(0.00000001)
 		self.i_plt += 1
 		return 0
 
-	def __init__(self, N):
+	def __init__(self, N,window):
 		Py_Module.__init__(self) # Call the aff3ct Py_Module __init__
 		self.name = "py_plot"   # Set your module's name
 
@@ -26,9 +26,9 @@ class Display(Py_Module):
 
 		self.fig   = plt.figure()
 		self.ax    = self.fig.add_subplot(1, 1, 1)
-		self.line, = self.ax.plot([], '-b')
+		self.line, = self.ax.plot([], '*b')
 		self.i_plt = 0
 		plt.xlabel("Real part")
 		plt.ylabel("Imaginary part")
-		plt.ylim(-2,2)
-		plt.xlim(-2,2)
+		plt.ylim(-window,window)
+		plt.xlim(-window,window)
