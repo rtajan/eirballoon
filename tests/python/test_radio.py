@@ -30,7 +30,7 @@ N=2*K
 Ns = N//2
 h = 64
 fse = 2
-fech = 1e6
+fech = 0.5e6
 ref = 1
 Ne = (h+Ns)*fse
 
@@ -68,11 +68,11 @@ noise = estimateur_bruit.Estimateur_bruit(2*(Ns+h),0.01)
 
 mdm = py_aff3ct.module.modem.Modem_BPSK_fast(2*Ns)
 dec = py_aff3ct.module.decoder.Decoder_repetition_std(K,N)
-snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.jpeg')
+snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.txt')
 
 
 display = py_display.Display(2*(Ns+h),10)
-info = display_info.display_info()
+info = display_info.display_info(1)
 
 info.bind_display(stm['synchronize::MU'])
 # info.bind_display(noise['estimate::cp'])
@@ -138,7 +138,7 @@ snk['send::V'].bind(dec['decode_siho::V_K'])
 
 
 sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"))
-
+#fr_syn("tr_synchronize").debug = True
 # sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"),dec('decode_siho'))
 
 l_tasks = sequence.get_tasks_per_types()
@@ -146,7 +146,7 @@ for lt in l_tasks:
     for t in lt:
         t.stats = True
         #t.debug = True
-        t.set_debug_limit(1)
+        #t.set_debug_limit(1)
 sequence.export_dot("seq.dot")
 signal.signal(signal.SIGINT, signal_handler)
 # signal.signal(signal.SIGINT, signal.default_int_handler)
