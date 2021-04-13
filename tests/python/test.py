@@ -8,51 +8,56 @@ import eirballoon
 import display_info
 import test_ampli
 import numpy as np
-import source_img
+# import source_img
 import matplotlib.pyplot as plt
 import signal
+import preamble
 
 process=None
 
 def signal_handler(sig, frame):
-    print('You pressed Ctrl+C!')
     sequence.show_stats()
-    process.send_signal(signal.SIGINT)
+    raise RuntimeError
 
 
-N=1024
-
+N= 8*188
+Nenc = 2*N
+P = 64
+K = 2*Nenc+4*P
 #src = py_aff3ct.module.source.Source_random(N)
 #src = source_img.source_img('doggo.jpeg',N)
-src = py_aff3ct.module.source.Source_user_binary(N,'doggo.jpeg',auto_reset=True)
-enc = py_aff3ct.module.encoder.Encoder_repetition_sys(N,2*N)
-mod = py_aff3ct.module.modem.Modem_BPSK_fast(2*N)
-h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.5,2,20)
-flt = eirballoon.filter.Filter_UPFIR(2*N,h,2)
-amp = test_ampli.test_ampli(0.7,4*N)
-inf = display_info.display_info()
+src = py_aff3ct.module.source.Source_user_binary(N,'video_src.ts',auto_reset=True)
+enc = py_aff3ct.module.encoder.Encoder_repetition_sys(N,Nenc)
+mod = py_aff3ct.module.modem.Modem_BPSK_fast(Nenc)
+pre = preamble.preamble(P,Nenc)
+h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.7,2,20)
+flt = eirballoon.filter.Filter_UPFIR(Nenc+2*P,h,2)
+
+amp = test_ampli.test_ampli(0.7,K)
+#inf = display_info.display_info()
 # inf.register_input("source",np.int32,N)
-inf.bind_display(src['generate::U_K' ])
-inf.done()
+# inf.bind_display(src['generate::U_K' ])
+# inf.done()
 
 usrp_params = eirballoon.radio.USRP_params()
-usrp_params.N          = 2*N
+usrp_params.N          = K//2
 usrp_params.threaded   = True
 usrp_params.usrp_addr  = "type=b100"
 usrp_params.tx_enabled = True
-usrp_params.tx_rate    = 500e3
+usrp_params.tx_rate    = 0.5e6
 usrp_params.fifo_size  = 10000
 usrp_params.tx_antenna = "TX/RX"
 usrp_params.tx_freq    = 2450e6
 
 radio   = eirballoon.radio.Radio_USRP(usrp_params)
-display = py_display.Display(4*N)
+display = py_display.Display(K,2)
+
 
 
 enc['encode::U_K'].bind(src['generate::U_K' ])
-# inf['display::source'].bind(src['generate::U_K' ])
 mod['modulate::X_N1'].bind(enc['encode::X_N'])
-flt[  'filter::X_N1'].bind(mod['modulate::X_N2'])
+pre['insert_preamble::s_in'].bind(mod['modulate::X_N2'])
+flt[  'filter::X_N1'].bind(pre['insert_preamble::s_out'])
 amp['amplify::amp_in'].bind(flt['filter::Y_N2'])
 radio['send::X_N1'].bind(amp['amplify::amp_out'])
 display['plot::x'].bind(amp['amplify::amp_out'])
@@ -66,6 +71,7 @@ l_tasks = sequence.get_tasks_per_types()
 for lt in l_tasks:
     for t in lt:
         t.stats = True
+        #t.debug = True
 
 
 signal.signal(signal.SIGINT, signal_handler)

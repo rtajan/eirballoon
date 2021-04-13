@@ -1,6 +1,5 @@
 from numba import jit
 from py_aff3ct.module.py_module import Py_Module
-import fairepream
 from math import *
 import numpy as np
 import sys

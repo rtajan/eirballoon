@@ -3,6 +3,7 @@ import sys
 sys.path.insert(0, '../../build/lib')
 from py_aff3ct.module.py_module import Py_Module
 
+
 class test_ampli(Py_Module):
 
     def ampli(self,in_,out_):

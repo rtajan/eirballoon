@@ -44,7 +44,7 @@ class Frequency_Synchronizer(Py_Module):
         s_desynch[0, 1::2] = np.imag(yl)
         return 0
 
-    def __init__(self,N):
+    def __init__(self,N,):
         Py_Module.__init__(self)
         self.name = "Frequency_Synchronizer"
         t_synch = self.create_task("synchronize")
