@@ -20,13 +20,13 @@ def signal_handler(sig, frame):
     raise RuntimeError
 
 
-N= 1024
+N= 8*188
 Nenc = 2*N
 P = 64
 K = 2*Nenc+4*P
 #src = py_aff3ct.module.source.Source_random(N)
 #src = source_img.source_img('doggo.jpeg',N)
-src = py_aff3ct.module.source.Source_user_binary(N,'doggo.jpeg',auto_reset=True)
+src = py_aff3ct.module.source.Source_user_binary(N,'video_src.ts',auto_reset=True)
 enc = py_aff3ct.module.encoder.Encoder_repetition_sys(N,Nenc)
 mod = py_aff3ct.module.modem.Modem_BPSK_fast(Nenc)
 pre = preamble.preamble(P,Nenc)
@@ -44,7 +44,7 @@ usrp_params.N          = K//2
 usrp_params.threaded   = True
 usrp_params.usrp_addr  = "type=b100"
 usrp_params.tx_enabled = True
-usrp_params.tx_rate    = 1e6
+usrp_params.tx_rate    = 0.5e6
 usrp_params.fifo_size  = 10000
 usrp_params.tx_antenna = "TX/RX"
 usrp_params.tx_freq    = 2450e6
@@ -71,6 +71,7 @@ l_tasks = sequence.get_tasks_per_types()
 for lt in l_tasks:
     for t in lt:
         t.stats = True
+        #t.debug = True
 
 
 signal.signal(signal.SIGINT, signal_handler)
