@@ -15,13 +15,16 @@ set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+message(STATUS "${CMAKE_MODULE_PATH}")
+
 # Link with AFF3CT
 set (AFF3CT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/py_aff3ct/cmake/Modules/")
 find_package(AFF3CT CONFIG 2.3.2 REQUIRED)
 
 add_subdirectory(py_aff3ct/lib/pybind11)
 
-file(GLOB_RECURSE SRC_FILES_CO ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/*)
+file(GLOB_RECURSE SRC_FILES_CO ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE PA_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/py_aff3ct/src/*)
 
 # `pybind11_add_module` is a wrapper of the CMake `add_library` function
@@ -57,3 +60,23 @@ if(LINK_UHD)
 else()
     message(STATUS "UHD: off")
 endif(LINK_UHD)
+
+option(LINK_LIBHACKRF "Link with the LIBHACKRF library (used in the radio HARCKRF)" ON)
+if(LINK_LIBHACKRF)
+    message(STATUS "LIBHACKRF: on")
+    target_compile_definitions(eirballoon-lib PUBLIC
+                               $<BUILD_INTERFACE:LINK_LIBHACKRF>
+                               $<INSTALL_INTERFACE:LINK_LIBHACKRF>)
+
+    # Link UHD
+    find_package (LIBHACKRF REQUIRED)
+    if    (LIBHACKRF_FOUND)
+    message(STATUS "LIBHACKRF    : found")
+    message(STATUS "LIBHACKRF INC: ${LIBHACKRF_INCLUDE_DIRS}")
+    message(STATUS "LIBHACKRF LIB: ${LIBHACKRF_LIBRARIES}")
+        include_directories(${LIBHACKRF_INCLUDE_DIRS})
+        target_link_libraries(eirballoon-lib PRIVATE ${LIBHACKRF_LIBRARIES})
+    endif (LIBHACKRF_FOUND)
+else()
+    message(STATUS "LIBHACKRF: off")
+endif(LINK_LIBHACKRF)

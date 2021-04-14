@@ -18,15 +18,29 @@
 
 #include "Module/Radio/Radio.hpp"
 #include "Module/Interrupteur/Interrupteur.hpp"
+#include "Module/Converter/f2i/Converter_f2i.hpp"
+
 #ifdef LINK_UHD
 #include "Module/Radio/Radio_USRP/Radio_USRP.hpp"
 #endif //LINK_UHD
+#ifdef LINK_LIBHACKRF
+#include "Module/Radio/Radio_HACKRF/Radio_HACKRF.hpp"
+#endif //LINK_LIBHACKRF
 
 namespace py = pybind11;
 using namespace py::literals;
 using namespace aff3ct;
 
 PYBIND11_MODULE(eirballoon, m){
+	py::scoped_ostream_redirect stream_cout(
+	std::cout,                                // std::ostream&
+	py::module_::import("sys").attr("stdout") // Python output
+	);
+	py::scoped_ostream_redirect stream_cerr(
+	std::cerr,                                // std::ostream&
+	py::module_::import("sys").attr("stderr") // Python output
+	);
+
 	// Split in two following https://pybind11.readthedocs.io/en/stable/advanced/misc.html#avoiding-c-types-in-docstrings
 	// for enhancing python doc
 	py::object py_aff3ct_module = (py::object) py::module_::import("py_aff3ct").attr("module").attr("Module");
@@ -38,7 +52,7 @@ PYBIND11_MODULE(eirballoon, m){
 
 	py::class_<aff3ct::module::Filter_FIR<float>, aff3ct::module::Filter<float>>(m_filter,"Filter_FIR")
 		.def(py::init<const int, const std::vector<float>>(), "N"_a, "h"_a);
-	
+
 	py::class_<aff3ct::module::Filter_FIR_ccr<float>, aff3ct::module::Filter_FIR<float>>(m_filter,"Filter_FIR_ccr")
 		.def(py::init<const int, const std::vector<float>>(), "N"_a, "h"_a);
 
@@ -70,8 +84,12 @@ PYBIND11_MODULE(eirballoon, m){
 	py::class_<aff3ct::module::Interrupteur<int, float>, aff3ct::module::Module>(m_itr,"Interrupteur")
 		.def(py::init<const int>(), "N"_a);
 
+	py::module_ m_cvt = m.def_submodule("converter");
+	py::class_<aff3ct::module::Converter_f2i, aff3ct::module::Module>(m_cvt,"Converter_f2i")
+		.def(py::init<const int>(), "N"_a);
+
 	#ifdef LINK_UHD
-	
+
 	py::class_<aff3ct::module::USRP_params>(m_radio,"USRP_params")
 	.def(py::init<>())
 	.def_readwrite("N",              &aff3ct::module::USRP_params::N             )
@@ -87,16 +105,48 @@ PYBIND11_MODULE(eirballoon, m){
 	.def_readwrite("rx_freq",        &aff3ct::module::USRP_params::rx_freq       )
 	.def_readwrite("rx_gain",        &aff3ct::module::USRP_params::rx_gain       )
 	.def_readwrite("rx_filepath",    &aff3ct::module::USRP_params::rx_filepath   )
-	.def_readwrite("tx_enabled",     &aff3ct::module::USRP_params::tx_enabled    )	
+	.def_readwrite("tx_enabled",     &aff3ct::module::USRP_params::tx_enabled    )
 	.def_readwrite("tx_rate",        &aff3ct::module::USRP_params::tx_rate       )
 	.def_readwrite("tx_subdev_spec", &aff3ct::module::USRP_params::tx_subdev_spec)
 	.def_readwrite("tx_antenna",     &aff3ct::module::USRP_params::tx_antenna    )
 	.def_readwrite("tx_freq",        &aff3ct::module::USRP_params::tx_freq       )
-	.def_readwrite("tx_gain",        &aff3ct::module::USRP_params::tx_gain       )	
+	.def_readwrite("tx_gain",        &aff3ct::module::USRP_params::tx_gain       )
 	.def_readwrite("tx_filepath",    &aff3ct::module::USRP_params::tx_filepath   );
 
-	py::class_<aff3ct::module::Radio_USRP<float>, aff3ct::module::Radio<float>>(m_radio,"Radio_USRP")
+	py::class_<aff3ct::module::Radio_USRP<float>, aff3ct::module::Module>(m_radio,"Radio_USRP")
 		.def(py::init<const aff3ct::module::USRP_params&>(), "params"_a, "USRP parameter object.");
-	
+
 	#endif //LINK_UHD
+
+	#ifdef LINK_LIBHACKRF
+	py::class_<aff3ct::module::HACKRF_params>(m_radio,"HACKRF_params")
+	.def(py::init<>())
+	.def_readwrite("N",              &aff3ct::module::HACKRF_params::N             )
+	.def_readwrite("threaded",       &aff3ct::module::HACKRF_params::threaded      )
+	.def_readwrite("fifo_size",      &aff3ct::module::HACKRF_params::fifo_size     )
+	.def_readwrite("type",           &aff3ct::module::HACKRF_params::type          )
+	.def_readwrite("addr",           &aff3ct::module::HACKRF_params::addr          )
+	.def_readwrite("clk_rate",       &aff3ct::module::HACKRF_params::clk_rate      )
+	.def_readwrite("rx_enabled",     &aff3ct::module::HACKRF_params::rx_enabled    )
+	.def_readwrite("rx_rate",        &aff3ct::module::HACKRF_params::rx_rate       )
+	.def_readwrite("rx_subdev_spec", &aff3ct::module::HACKRF_params::rx_subdev_spec)
+	.def_readwrite("rx_antenna",     &aff3ct::module::HACKRF_params::rx_antenna    )
+	.def_readwrite("rx_freq",        &aff3ct::module::HACKRF_params::rx_freq       )
+	.def_readwrite("rx_gain",        &aff3ct::module::HACKRF_params::rx_gain       )
+	.def_readwrite("rx_filepath",    &aff3ct::module::HACKRF_params::rx_filepath   )
+	.def_readwrite("tx_enabled",     &aff3ct::module::HACKRF_params::tx_enabled    )
+	.def_readwrite("tx_rate",        &aff3ct::module::HACKRF_params::tx_rate       )
+	.def_readwrite("tx_subdev_spec", &aff3ct::module::HACKRF_params::tx_subdev_spec)
+	.def_readwrite("tx_antenna",     &aff3ct::module::HACKRF_params::tx_antenna    )
+	.def_readwrite("tx_freq",        &aff3ct::module::HACKRF_params::tx_freq       )
+	.def_readwrite("tx_gain",        &aff3ct::module::HACKRF_params::tx_gain       )
+	.def_readwrite("tx_filepath",    &aff3ct::module::HACKRF_params::tx_filepath   );
+
+	py::class_<aff3ct::module::Radio_HACKRF<int8_t>,  aff3ct::module::Module>(m_radio,"Radio_HACKRF")
+		.def(py::init<const aff3ct::module::HACKRF_params&>(), "params"_a, "HACK RF parameter object.")
+		.def ("start_rx", &aff3ct::module::Radio_HACKRF<int8_t>::start_rx)
+		.def ("stop_rx" , &aff3ct::module::Radio_HACKRF<int8_t>:: stop_rx)
+		.def ("start_tx", &aff3ct::module::Radio_HACKRF<int8_t>::start_tx)
+		.def ("stop_tx" , &aff3ct::module::Radio_HACKRF<int8_t>:: stop_tx);
+	#endif //LINK_LIBHACKRF
 }

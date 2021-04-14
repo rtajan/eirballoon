@@ -8,6 +8,7 @@
 #ifndef RADIO_HPP
 #define RADIO_HPP
 
+#include "Tools/Interface/Interface_is_done.hpp"
 #include "Module/Module.hpp"
 
 namespace aff3ct
@@ -35,7 +36,7 @@ namespace module
  *
  */
 template <typename R = float>
-class Radio : public Module
+class Radio : public Module, public Interface_is_done
 {
 public:
 	inline Task&   operator[](const rad::tsk          t) { return Module::operator[]((int)t);                         }
@@ -48,6 +49,8 @@ protected:
 	std::vector<int32_t> seq_flags;
 	std::vector<int32_t> clt_flags;
 	std::vector<int32_t> tim_flags;
+
+	static bool done_flag;
 
 public:
 	/*!
@@ -85,7 +88,7 @@ public:
 	             std::vector<int32_t>& CLT,
 	             std::vector<int32_t>& TIM,
 	             std::vector<R,A>& Y_N1,
-	             const int frame_id = -1, 
+	             const int frame_id = -1,
 				 const bool managed_memory = true);
 
 	virtual void receive(int32_t *OVF,
@@ -93,13 +96,16 @@ public:
 	                     int32_t *CLT,
 	                     int32_t *TIM,
 	                     R *Y_N1,
-	                     const int frame_id = -1, 
+	                     const int frame_id = -1,
 						 const bool managed_memory = true);
 
 	virtual void set_n_frames(const size_t n_frames);
 protected:
 	virtual void _send   (const R *X_N1, const int frame_id) = 0;
 	virtual void _receive(      R *Y_N1, const int frame_id) = 0;
+	virtual bool is_done() const;
+	static void signal_handler (int signum);
+
 };
 }
 }
