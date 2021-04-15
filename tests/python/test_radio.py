@@ -16,6 +16,7 @@ import estimateur_bruit
 import preamble
 import frame_synchro
 import correc_saut_phase
+import scrambler
 
 process=None
 
@@ -25,7 +26,7 @@ def signal_handler(sig, frame):
     process.send_signal(signal.SIGINT)
     # raise KeyboardInterrupt
 
-K=1024
+K=8*188
 N=2*K
 Ns = N//2
 h = 64
@@ -68,7 +69,8 @@ noise = estimateur_bruit.Estimateur_bruit(2*(Ns+h),0.01)
 
 mdm = py_aff3ct.module.modem.Modem_BPSK_fast(2*Ns)
 dec = py_aff3ct.module.decoder.Decoder_repetition_std(K,N)
-snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.txt')
+scramb = scrambler.scrambler(K,"scramble")
+snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.ts')
 
 
 display = py_display.Display(2*(Ns+h),10)
@@ -130,7 +132,8 @@ noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
 mdm['demodulate::CP'].bind(noise['estimate::cp'])
 # mdm['demodulate::CP'].bind(CP)
 dec['decode_siho::Y_N'].bind(mdm['demodulate::Y_N2'])
-snk['send::V'].bind(dec['decode_siho::V_K'])
+scramb['scramble::X_N'].bind(dec['decode_siho::V_K'])
+snk['send::V'].bind(scramb["scramble::Y_N"])
 # dec('decode_siho').debug = True
 # mdm('demodulate').debug = True
 
