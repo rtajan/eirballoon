@@ -41,7 +41,7 @@ void Synchronizer_Gardner<B, R>
 	auto cY_N1 = reinterpret_cast<      std::complex<R>*>(Y_N1);
 
 	for (auto i = 0; i < this->N_in/2 ; i++)
-		this->step(&cX_N1[i], &MU[i], &cY_N1[i], &B_N1[2*i]);
+		this->step(&cX_N1[i], MU, &cY_N1[i], &B_N1[2*i]);
 }
 
 template <typename B, typename R>

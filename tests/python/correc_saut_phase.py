@@ -12,12 +12,18 @@ class Anti_saut_phase(Py_Module):
         
         header_est_comp = np.array(header_est[::2]+1j*header_est[1::2])
         true_header = np.array(self.header[0,::2]+1j*self.header[0,1::2])
-        diff_phase = np.angle(header_est_comp)
-        diff_phase = diff_phase - np.angle(true_header)
+        # diff_phase = np.angle(header_est_comp)
+        # diff_phase = diff_phase - np.angle(true_header)
+        z = np.mean(header_est_comp*np.conjugate(true_header))
         #print(diff_phase)
-        jump[:] = np.mean(diff_phase)
-        out[::2] = np.cos(jump[:])*in_[::2]
-        out[1::2] = np.sin(jump[:])*in_[1::2]
+        zr = np.real(z)
+        zi = np.imag(z)
+        abs_z = zr*zr+zi*zi
+        jump[:] = np.angle(z)
+        out[0,::2] = in_[0,::2]*zr+in_[0,1::2]*zi
+        out[0,1::2] = in_[0,1::2]*zr-in_[0,::2]*zi
+        out /= abs_z
+
         return 0
 
     def __init__(self, K , header):

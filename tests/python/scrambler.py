@@ -7,6 +7,10 @@ sys.path.insert(0, '../../build/lib')
 
 class scrambler(Py_Module):
 
+    def scramble_(in_,out,scram):
+        out[:]=np.logical_xor(in_[:],scram)
+        return out
+
     def get_scram(self,path):  #get header from file
         out=[]
         with open(path, 'r') as filehandle:
@@ -15,8 +19,7 @@ class scrambler(Py_Module):
         return out
 
     def scramble(self, in_, out_):
-        out_[:]=np.logical_xor(in_[:],self.scram,dtypte =np.int32)
-
+        out_[:] = scrambler.scramble_(in_,out_,self.scram)
         return 0
 
     def __init__(self, K,scramble):

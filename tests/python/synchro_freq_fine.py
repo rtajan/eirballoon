@@ -7,7 +7,7 @@ sys.path.insert(0, '../../build/lib')
 
 
 class synchro_freq_fine(Py_Module):
-    @jit(nopython=True)
+    @jit(nopython=True, nogil=True, cache = True)
     def func_(s_in, s_out, previousSample, phase, loopFiltState, DDSPreviousInp, IntegFiltState, gI, gP):
         for k in range(len(s_in[0, :])//2):
             phErr = np.sign(np.real(previousSample))*np.imag(previousSample) - \
