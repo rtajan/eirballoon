@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -21,10 +22,14 @@
 #éteindre l'émetteur
 import json
 import os
+# import sys
+# sys.path.insert(1,'./classes/sched_tasks')
 import time 
 from datetime import datetime
 import json
 import stat
+from inspect import getmembers, isfunction
+from sched_tasks import Task
 from os import path
 
 def isfifo(self,fn):
@@ -50,14 +55,13 @@ class amp:
 
 class Start:
     '''Main class in scheduler '''
-
+    
     def initialize(self):
         
         #defining global attributes
         self.photos_counter=0
         self.video_counter=0
         self.videos_ttl=0  #total length
-        self.currentTaskNumber=""
         self.currentTaskName=""
 
         ##############################################################################################
@@ -80,10 +84,10 @@ class Start:
        #creating log file
         self.fichier_log=open(self.path_log, "w")
         self.fichier_log.write(datetime.now().strftime("%H:%M:%S")+" Starting Task Scheduling Log "+"\n")
-        print("selfpath "+self.path)
        
 
- 
+    def sched_sleep(self, secs):
+        time.sleep(secs)
     def tube_creator(self):
 
         #if pipe exists delete pipe
@@ -94,26 +98,9 @@ class Start:
             os.mkfifo(self.pipe_path)
             self.fichier_log.write(datetime.now().strftime("%H:%M:%S")+": Creating a named pipe in "+self.pipe_path+"\n")
    
-    def take_a_photo(self):
-        #prendre une photo
 
-        filename=self.mediaFilePath+str(self.photos_counter)
-        self.fichier_log.write(datetime.now().strftime("%H:%M:%S")+": Taking photo"+"\n")
-        self.photos_counter+=1
 
-    def record_video(self, vid_sec):
-        #prendre une video
 
-        filename=self.mediaFilePath+str(self.video_counter)
-
-        self.fichier_log.write(datetime.now().strftime("%H:%M:%S")+": Taking video for "+str(vid_sec)+" seconds"+"\n")
-
-        self.video_counter+=1
-        self.videos_ttl+=vid_sec
-
-    def start_aff3ct(self):
-
-        self.ficher_log.write(datetime.now().strftime("%H:%M:%S")+": Starting Aff3ct"+"\n")
 
 
 if __name__ == "__main__":
@@ -121,37 +108,32 @@ if __name__ == "__main__":
     StartObj=Start() 
     #initializing path vars and
     StartObj.initialize()
-   
+    #dictionary containing global variables
+    envvar={"MediaFilePath":StartObj.mediaFilePath, "LogFile":StartObj.fichier_log }
+
     with open(StartObj.path+'py_hackrf/tasks.json') as json_file:
         data = json.load(json_file)
         '''
         from now on the only tasks executed are the tasks on the JSON file
             - each task has a name task_name
-            - each task has a number task_number
             - each task has a list of task args task_args for example: below record has an argument of 4 seconds 
             - each task has a time offset task_offset: the exec sleeps for a number of seconds before exec the next step
         feel free to add/modify the task structures in the JSON file
 
         '''
+        TaskObjs=[]
         for all_tasks in data.values():
-                task=all_tasks[0] # --> task_n
-                StartObj.currentTaskName=task["task_name"]
 
-                #switch 
-                if StartObj.currentTaskName=="take_photo":
-                    StartObj.take_a_photo()
-                    StartObj.photos_counter+=1
-                    time.sleep(int(task["task_offset"]))
-                elif StartObj.currentTaskName=="record":
-                    StartObj.record_video(int(task['task_args'][0]['arg_1']))
-                    time.sleep(int(task["task_offset"]))
-                elif StartObj.currentTaskName=="create_pipe":
-                    StartObj.tube_creator()
-                    time.sleep(int(task["task_offset"]))
-                else:
-                    print("NONE")
+                task=all_tasks[0] # --> task_n
+                #initialisation des objets Task
+
+                currentTask=Task()
+                currentTask.initialize(task["task_name"], task['task_args'][0], task['task_offset'] )
+
+                #args reformatting
+                currentTask.TaskArgs.update(envvar)
+                #executing task routine
+                currentTask.exec(currentTask.TaskArgs)
+                StartObj.sched_sleep(currentTask.offset)
 
         StartObj.fichier_log.close()
-
-
-# main()

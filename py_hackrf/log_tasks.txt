@@ -1,0 +1,4 @@
+15:47:27 Starting Task Scheduling Log 
+15:47:27: Taking video for 4 seconds
+15:47:31: Taking photo
+15:47:33: Taking photo

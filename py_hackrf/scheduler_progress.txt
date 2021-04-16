@@ -1,0 +1,11 @@
+scheduler_progress.txt
+    - create a generic class task and move all the actual functions there -DONE
+    - read its attributes from json file - DONE
+    - it should have a lambda function an exec() -DONE
+    - write a json file checker at the end to see if all the tasks are set up (pas d'erreur de frappe, pas d'arguments omis)
+    - store all the exec names in a dictionnary to make correspondance between keys and functions -DONE
+    
+
+
+
+
