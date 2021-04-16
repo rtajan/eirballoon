@@ -19,7 +19,14 @@ class data_encapsulation(Py_Module):
         for i in range(len(tmp)-2):
             out[i]=int(tmp[i+2])
         return out
-    
+
+    def binseq2int(self,seq): #binnary sequence 2 int 
+        tmp=''
+        for i in range(len(seq)):
+            tmp+=str(seq(i))
+        return(int(tmp,2))
+
+
     def build_info_header(self): #updates info header   
         
         #set file type
@@ -58,8 +65,14 @@ class data_encapsulation(Py_Module):
         print(s_out)
         return 0     
     
-    #def deencapsulate(self,recv,):  
-        #return 0
+    def decapsulate(self,enc_bits,out_data,out_p_type,out_p_id,out_f_type,out_f_id,out_f_size):  
+        out_data=enc_bits[self.INFO_SIZE+1:]
+        out_p_type=self.binseq2int(enc_bits[:2])
+        out_p_id=self.binseq2int(enc_bits[2:19])
+        out_f_id=self.binseq2int(enc_bits[19:36])
+        out_f_type=self.binseq2int(enc_bits[36:37])
+        out_f_size=self.binseq2int(enc_bits[37:60])
+        return 0
     
     def __init__(self,len):
         
@@ -85,13 +98,16 @@ class data_encapsulation(Py_Module):
         Py_Module.__init__(self)
         self.name = "data_encapsulation"
         dt_enc = self.create_task("encapsulate")
-        b_in= self.create_socket_in (dt_enc, "IN", self.PACKET_SIZE, np.int32)  #preferably input window should be smaller thacn frame size bigger than data size
-        b_out_main= self.create_socket_out(dt_enc,"OUT", self.PACKET_SIZE+self.INFO_SIZE, np.int32)   #return frame size
+        b_in_enc= self.create_socket_in (dt_enc, "IN", self.PACKET_SIZE, np.int32)  #preferably input window should be smaller thacn frame size bigger than data size
+        b_out_enc= self.create_socket_out(dt_enc,"OUT", self.PACKET_SIZE+self.INFO_SIZE, np.int32)   #return frame size
 
-        self.create_codelet(dt_enc, lambda slf, lsk, fid: slf.encapsulate(lsk[b_in],lsk[b_out_main]))
+        self.create_codelet(dt_enc, lambda slf, lsk, fid: slf.encapsulate(lsk[b_in_enc],lsk[b_out_enc]))
 
+        dt_dec = self.create_task("decapsulate")
+        b_in_dec= self.create_socket_in (dt_enc, "IN", self.PACKET_SIZE, np.int32)  #preferably input window should be smaller thacn frame size bigger than data size
+        b_out_dec= self.create_socket_out(dt_enc,"OUT", self.PACKET_SIZE+self.INFO_SIZE, np.int32)   #return frame size
 
-
+        self.create_codelet(dt_enc, lambda slf, lsk, fid: slf.decapsulate(lsk[b_in_dec],lsk[b_out_dec]))
 
 #test
 
