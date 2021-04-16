@@ -10,10 +10,14 @@
 
 #include <sstream>
 #include <complex>
+#include <csignal>
 
 #include "Tools/Exception/exception.hpp"
 
 #include "Module/Radio/Radio.hpp"
+
+template<typename R>
+bool aff3ct::module::Radio<R>::done_flag = false;
 
 namespace aff3ct
 {
@@ -33,6 +37,7 @@ Radio<R>
 	const std::string name = "Radio";
 	this->set_name(name);
 	this->set_short_name(name);
+	signal(SIGINT, Radio<R>::signal_handler);
 
 	if (N <= 0)
 	{
@@ -60,7 +65,7 @@ Radio<R>
 		auto& radio = static_cast<Radio<R>&>(m);
 		radio._receive(static_cast<R*>(t[p2s_Y_N1].get_dataptr()), frame_id);
 
-		
+
 		auto OVF = static_cast<int32_t*>(t[p2s_OVF ].get_dataptr());
 		auto SEQ = static_cast<int32_t*>(t[p2s_SEQ ].get_dataptr());
 		auto CLT = static_cast<int32_t*>(t[p2s_CLT ].get_dataptr());
@@ -76,6 +81,13 @@ Radio<R>
 
 		return 0;
 	});
+}
+
+template <typename R>
+bool Radio<R>
+::is_done() const
+{
+	return Radio<R>::done_flag;
 }
 
 template <typename R>
@@ -96,6 +108,7 @@ void Radio<R>
 {
 	(*this)[rad::sck::send::X_N1].bind(X_N1);
 	(*this)[rad::tsk::send].exec(frame_id, managed_memory);
+
 }
 
 template <typename R>
@@ -114,7 +127,7 @@ void Radio<R>
           std::vector<int32_t>& CLT,
           std::vector<int32_t>& TIM,
           std::vector<R,A>& Y_N1,
-          const int frame_id, 
+          const int frame_id,
           const bool managed_memory)
 {
 	(*this)[rad::sck::receive::OVF ].bind(OVF);
@@ -124,6 +137,7 @@ void Radio<R>
 	(*this)[rad::sck::receive::Y_N1].bind(Y_N1);
 
 	(*this)[rad::tsk::receive].exec(frame_id, managed_memory);
+
 	//this->receive(OVF.data(), SEQ.data(), CLT.data(), TIM.data(), Y_N1.data(), frame_id);
 }
 
@@ -140,7 +154,14 @@ void Radio<R>
 	(*this)[rad::tsk::receive].exec(frame_id, managed_memory);
 }
 
+template <typename R>
+void Radio<R>::signal_handler (int signum)
+{
+	Radio<R>::done_flag = true;
+}
+
 }
 }
+
 
 #endif

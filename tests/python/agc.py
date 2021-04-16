@@ -12,7 +12,8 @@ class Agc(Py_Module):
         out_amp = self.out_amp
 
         #y = amp_in[0,abs(amp_in[0,:]) > varNoise]
-        y = [i for i in amp_in[0,:] if abs(i)>varNoise]
+        # y = [i for i in amp_in[0,:] if abs(i)>varNoise]
+        # y=amp_in
         v_ = np.var(y)
         gain = (out_amp / v_)
         amp_out[:] = gain*amp_in[:]

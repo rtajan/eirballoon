@@ -33,7 +33,7 @@ struct USRP_params
 	double rx_rate             = 0; // if rx_rate is not overriden, rx is disabled
 	std::string rx_subdev_spec = "";
 	std::string rx_antenna      = "RX2";
-	double rx_freq             = 1090e6;
+	double rx_freq             = 833e6;
 	double rx_gain             = 10;
 	std::string rx_filepath    = "";
 	std::string tx_filepath    = "";

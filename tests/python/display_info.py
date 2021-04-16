@@ -17,9 +17,10 @@ class display_info(Py_Module):
             self.init=False
 
     def display(self,lsk):
-        if self.frame % 50 == 0:
+        if self.frame % self.dc == 0:
             self.title(lsk)
-            formatted_str = "%21.3f"
+            formatted_str = "%20.3f"
+            print(" ",end="")
             for i in range(len(lsk)-1):
                 #print(" "*(18-len(str(lsk[i][0,0]))),lsk[i][0,0],end='|')
                 print(formatted_str%lsk[i][0,0],end='|')
@@ -47,10 +48,11 @@ class display_info(Py_Module):
 
 
 
-    def __init__(self):
+    def __init__(self,dc = 50):
         # init
         Py_Module.__init__(self)
         self.name = "display_info"
+        self.dc =dc
         t_dis = self.create_task('display')
         self.frame = 0
         self.init = True

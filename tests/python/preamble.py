@@ -46,13 +46,15 @@ class preamble(Py_Module):
    
 
     def remove_preamble(self, in_, out_):
-        out_=in_[self.len_pream:]
+        tmp=in_[0,2*self.len_pream:]
+        out_[:]=tmp
         return 0
 
     def __init__(self,len_pream,len_frame ): 
         Py_Module.__init__(self)
         self.name = 'preamble'
         self.len_frame=len_frame 
+        self.len_pream = len_pream
 
         #self.header1=self.create_preamble() #creer
         self.header=np.array(self.get_header("header.txt")).reshape(1,2*len_pream) #utiliser le preambule dans le fishier header.txt
@@ -63,8 +65,8 @@ class preamble(Py_Module):
         self.create_codelet(t_ins_pream,lambda slf, lsk, fid: self.insert_preamble(lsk[sin], lsk[sout]))
 
         t_rem_pream=self.create_task('remove_preamble')
-        s_in=self.create_socket_in(t_rem_pream, "s_in",len_frame+len_pream,np.float32)
-        s_out=self.create_socket_out(t_rem_pream, "s_out",self.len_frame,np.float32)
+        s_in=self.create_socket_in(t_rem_pream, "s_in",self.len_frame,np.float32)
+        s_out=self.create_socket_out(t_rem_pream, "s_out",len_frame-2*len_pream,np.float32)
         self.create_codelet(t_rem_pream, lambda slf, lsk, fid: self.remove_preamble(lsk[s_in], lsk[s_out]))
 
 
