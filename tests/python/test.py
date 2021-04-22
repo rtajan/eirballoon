@@ -13,11 +13,13 @@ import matplotlib.pyplot as plt
 import signal
 import preamble
 import scrambler
+import source_file
 
 process=None
 
 def signal_handler(sig, frame):
     sequence.show_stats()
+    sequence.export_dot("seq.dot")
     raise RuntimeError
 
 
@@ -26,8 +28,8 @@ Nenc = 2*N
 P = 64
 K = 2*Nenc+4*P
 #src = py_aff3ct.module.source.Source_random(N)
-#src = source_img.source_img('doggo.jpeg',N)
-src = py_aff3ct.module.source.Source_user_binary(N,'source.ts',auto_reset=True)
+src = source_file.source_file('toto.ts',N)
+#src = py_aff3ct.module.source.Source_user_binary(N,'toto.ts',auto_reset=True)
 scb = scrambler.scrambler(N,"scramble")
 enc = py_aff3ct.module.encoder.Encoder_repetition_sys(N,Nenc)
 mod = py_aff3ct.module.modem.Modem_BPSK_fast(Nenc)
