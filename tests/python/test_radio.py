@@ -31,7 +31,7 @@ N=2*K
 Ns = N//2
 h = 64
 fse = 2
-fech = 0.5e6
+fech = 1e6
 ref = 1
 Ne = (h+Ns)*fse
 
@@ -117,7 +117,7 @@ stm['extract::B_N1'].bind(stm['synchronize::B_N1'])
 
 sync_fine['synchronize::sync_in'].bind(stm['extract::Y_N2'])
 fr_syn["tr_synchronize::IN"].bind(sync_fine['synchronize::sync_out'])
-display['plot::x'].bind(sync_fine['synchronize::sync_out'])
+# display['plot::x'].bind(sync_fine['synchronize::sync_out'])
 itr_trame["select::X_N"].bind(fr_syn['tr_synchronize::OUT'])
 itr_trame["select::bln"].bind(fr_syn['tr_synchronize::itr_tr'])
 
@@ -126,7 +126,7 @@ noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
 correc_phase['sync::X_N'].bind(itr_trame["select::Y_N"])
 pre["remove_preamble::s_in"].bind(correc_phase["sync::Y_N"])
 mdm["demodulate::Y_N1"].bind(pre["remove_preamble::s_out"])
-#display['plot::x'].bind(sync_fine['synchronize::sync_out'])
+# display['plot::x'].bind(sync_fine['synchronize::sync_out'])
 # CP = np.array([[1]],dtype=np.float32)
 noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
 mdm['demodulate::CP'].bind(noise['estimate::cp'])
@@ -150,7 +150,6 @@ for lt in l_tasks:
         t.stats = True
         #t.debug = True
         #t.set_debug_limit(1)
-sequence.export_dot("seq.dot")
 signal.signal(signal.SIGINT, signal_handler)
 # signal.signal(signal.SIGINT, signal.default_int_handler)
 # try:
