@@ -24,14 +24,16 @@ def signal_handler(sig, frame):
 
 
 N= 8*188
-Nenc = 2*N
+H = 59
+HN = N + H
+Nenc = 2*HN
 P = 64
 K = 2*Nenc+4*P
 #src = py_aff3ct.module.source.Source_random(N)
 src = source_file.source_file('toto.ts',N)
 #src = py_aff3ct.module.source.Source_user_binary(N,'toto.ts',auto_reset=True)
-scb = scrambler.scrambler(N,"scramble")
-enc = py_aff3ct.module.encoder.Encoder_repetition_sys(N,Nenc)
+scb = scrambler.scrambler(HN,"scramble")
+enc = py_aff3ct.module.encoder.Encoder_repetition_sys(HN,Nenc)
 mod = py_aff3ct.module.modem.Modem_BPSK_fast(Nenc)
 pre = preamble.preamble(P,Nenc)
 h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.7,2,20)
