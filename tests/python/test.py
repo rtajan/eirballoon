@@ -24,14 +24,14 @@ def signal_handler(sig, frame):
 
 
 N= 8*188
-H = 59
+H = 60
 HN = N + H
-Nenc = 2*HN
+Nenc = 3*HN
 P = 64
 K = 2*Nenc+4*P
 #src = py_aff3ct.module.source.Source_random(N)
-src = source_file.source_file('toto.ts',N)
-#src = py_aff3ct.module.source.Source_user_binary(N,'toto.ts',auto_reset=True)
+src = source_file.source_file('doggo.jpeg',N)
+#src = py_aff3ct.module.source.Source_user_binary(N,'source.ts',auto_reset=True)
 scb = scrambler.scrambler(HN,"scramble")
 enc = py_aff3ct.module.encoder.Encoder_repetition_sys(HN,Nenc)
 mod = py_aff3ct.module.modem.Modem_BPSK_fast(Nenc)
@@ -40,17 +40,13 @@ h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.7,2,20)
 flt = eirballoon.filter.Filter_UPFIR(Nenc+2*P,h,2)
 
 amp = test_ampli.test_ampli(0.7,K)
-#inf = display_info.display_info()
-# inf.register_input("source",np.int32,N)
-# inf.bind_display(src['generate::U_K' ])
-# inf.done()
 
 usrp_params = eirballoon.radio.USRP_params()
 usrp_params.N          = K//2
 usrp_params.threaded   = True
 usrp_params.usrp_addr  = "type=b100"
 usrp_params.tx_enabled = True
-usrp_params.tx_rate    = 2e6
+usrp_params.tx_rate    = 0.5e6
 usrp_params.fifo_size  = 10000
 usrp_params.tx_antenna = "TX/RX"
 usrp_params.tx_freq    = 2450e6
@@ -66,7 +62,11 @@ pre['insert_preamble::s_in'].bind(mod['modulate::X_N2'])
 flt[  'filter::X_N1'].bind(pre['insert_preamble::s_out'])
 amp['amplify::amp_in'].bind(flt['filter::Y_N2'])
 radio['send::X_N1'].bind(amp['amplify::amp_out'])
-#display['plot::x'].bind(amp['amplify::amp_out'])
+display['plot::x'].bind(amp['amplify::amp_out'])
+inf = display_info.display_info(dc=10)
+inf.bind_display(src['generate::NB'])
+inf.bind_display(src['generate::ID'])
+inf.done()
 
 
 sequence = py_aff3ct.tools.sequence.Sequence(src('generate'),radio('send'),1)
