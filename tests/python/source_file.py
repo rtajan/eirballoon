@@ -72,19 +72,17 @@ class source_file(Py_Module):
         return np.ceil(binary_size//self.N)
 
     def binseq2int(self,seq): #binnary sequence 2 int 
-        tmp=''
-        for i in range(len(seq)):
-            tmp+=str(seq(i))
-        return(int(tmp,2))
+        return BitArray(seq[:]).uint
+
 
 
     def decapsulate(self,enc_bits,out_data,out_p_type,out_p_id,out_f_type,out_f_id,out_f_size):  
-        out_data[:]=enc_bits[self.INFO_SIZE:]
-        out_p_type[:]=self.binseq2int(enc_bits[:2])
-        out_p_id[:]=self.binseq2int(enc_bits[2:18])
-        out_f_id[:]=self.binseq2int(enc_bits[18:34])
-        out_f_type[:]=self.binseq2int(enc_bits[34:36])
-        out_f_size[:]=self.binseq2int(enc_bits[36:60])
+        out_data[:]=enc_bits[0,self.INFO_SIZE:]
+        out_p_type[:]=self.binseq2int(enc_bits[0,:2])
+        out_p_id[:]=self.binseq2int(enc_bits[0,2:18])
+        out_f_id[:]=self.binseq2int(enc_bits[0,18:34])
+        out_f_type[:]=self.binseq2int(enc_bits[0,34:36])
+        out_f_size[:]=self.binseq2int(enc_bits[0,36:60])
         return 0
 
 
@@ -99,10 +97,11 @@ class source_file(Py_Module):
         self.tmp=0
         if path:
             self.number_packet = self.compute_packet_number()
-
+        else: 
+            self.number_packet = 0
         #infos
         self.F_ID=0 #16 bits, file id (65536 file)
-        self.F_TYPE=0 #1 bit , file type (0 .Ts file, 1 img any type) 
+        self.F_TYPE=0 #1 bit , file type (0 .Ts file, 1 img any type
         self.F_SIZE=int(self.number_packet)+1 #24 bits to encode file size in bytes (< 16Mbytes)
         self.PACKET_ID=0#16 bits, packet order received for a ts file used to reorder in another  
         self.PACKET_TYPE=0 #2 bits to encode 3 types of frames ;1 start// 0 mid// 2 end// 

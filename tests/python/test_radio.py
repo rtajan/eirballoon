@@ -17,21 +17,29 @@ import preamble
 import frame_synchro
 import correc_saut_phase
 import scrambler
+import detect_coming_trame
+import float_to_int
+import source_file
 
 process=None
 
 def signal_handler(sig, frame):
     #print('You pressed Ctrl+C!')
+    sequence.export_dot("seq.dot")
     sequence.show_stats()
     process.send_signal(signal.SIGINT)
+    
     # raise KeyboardInterrupt
 
-K=8*188
-N=2*K
-Ns = N//2
-h = 64
+H=60 #taille du Header
+K=8*188 #nombre de bits utiles
+HK = K+H #Taille packet
+N=3*HK #Taille packet encodé
+Ns = N//2 # Nombre de symbole
+h = 64 #taille du préambule
+
 fse = 2
-fech = 1e6
+fech = 0.5e6
 ref = 1
 Ne = (h+Ns)*fse
 
@@ -49,8 +57,7 @@ usrp_params.rx_gain = 10
 
 
 pre=preamble.preamble(h,2*(Ns+h))
-head=pre.header 
-
+head=pre.header
 radio   = eirballoon.radio.Radio_USRP(usrp_params)
 amp = mean_agc.Mean_Agc(ref,2*Ne)
 itr = eirballoon.interrupteur.Interrupteur(2*Ne)
@@ -67,23 +74,34 @@ correc_phase = correc_saut_phase.Anti_saut_phase(2*(Ns+h),head)
 
 noise = estimateur_bruit.Estimateur_bruit(2*(Ns+h),0.01)
 
-mdm = py_aff3ct.module.modem.Modem_BPSK_fast(2*Ns)
-dec = py_aff3ct.module.decoder.Decoder_repetition_std(K,N)
-scramb = scrambler.scrambler(K,"scramble")
-snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.ts')
+mdm = py_aff3ct.module.modem.Modem_BPSK_fast(N)
+dec = py_aff3ct.module.decoder.Decoder_repetition_std(HK,N)
+scramb = scrambler.scrambler(HK,"scramble")
+dcp = source_file.source_file(None,K,auto_reset=False)
+
+detector_file = detect_coming_trame.detect_coming_trame(K)
+itr_writing = eirballoon.interrupteur.Interrupteur(K)
+
+converter = float_to_int.f2i(K)
+
+snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.jpeg')
 
 
 display = py_display.Display(2*(Ns+h),10)
 info = display_info.display_info(1)
 
-info.bind_display(stm['synchronize::MU'])
+info.bind_display(dcp["decapsulate::Packet_ID"])
+info.bind_display(dcp["decapsulate::out_f_size"])
+info.bind_display(dcp["decapsulate::p_type"])
+# info.bind_display(stm['synchronize::MU'])
 # info.bind_display(noise['estimate::cp'])
 info.bind_display(noise["estimate::snr"])
-info.bind_display(amp["amplify::gain_out"])
+# info.bind_display(amp["amplify::gain_out"])
 info.bind_display(fr_syn["tr_synchronize::delay"])
-info.bind_display(amp["amplify::itr"])
-info.bind_display(fr_syn["tr_synchronize::itr_tr"])
 info.bind_display(correc_phase["sync::phase_jump"])
+info.bind_display(detector_file["detect::itr"])
+# info.bind_display(fr_syn["tr_synchronize::itr_tr"])
+
 info.done()
 
 
@@ -126,14 +144,27 @@ noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
 correc_phase['sync::X_N'].bind(itr_trame["select::Y_N"])
 pre["remove_preamble::s_in"].bind(correc_phase["sync::Y_N"])
 mdm["demodulate::Y_N1"].bind(pre["remove_preamble::s_out"])
-# display['plot::x'].bind(sync_fine['synchronize::sync_out'])
+#display['plot::x'].bind(sync_fine['synchronize::sync_out'])
+# display['plot::x'].bind(correc_phase["sync::Y_N"])
+#display['plot::x'].bind(fr_syn['tr_synchronize::OUT'])
+#display['plot::x'].bind(pre["remove_preamble::s_out"])
+
 # CP = np.array([[1]],dtype=np.float32)
 noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
 mdm['demodulate::CP'].bind(noise['estimate::cp'])
 # mdm['demodulate::CP'].bind(CP)
 dec['decode_siho::Y_N'].bind(mdm['demodulate::Y_N2'])
 scramb['scramble::X_N'].bind(dec['decode_siho::V_K'])
-snk['send::V'].bind(scramb["scramble::Y_N"])
+dcp["decapsulate::IN"].bind(scramb["scramble::Y_N"])
+detector_file['detect::X_N'].bind(dcp["decapsulate::OUT"])
+detector_file['detect::end_packet'].bind(dcp["decapsulate::p_type"])
+itr_writing["select::bln"].bind(detector_file["detect::itr"])
+itr_writing["select::X_N"].bind(detector_file["detect::Y_N"])
+converter['convert::X_N'].bind(itr_writing['select::Y_N'])
+# converter['convert::X_N'].bind(detector_file["detect::Y_N"])
+
+snk['send::V'].bind(converter['convert::Y_N'])
+# snk['send::V'].bind(scramb["scramble::Y_N"])
 # dec('decode_siho').debug = True
 # mdm('demodulate').debug = True
 
