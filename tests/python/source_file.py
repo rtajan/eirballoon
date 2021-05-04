@@ -71,20 +71,6 @@ class source_file(Py_Module):
         binary_size = os.path.getsize(self.path) * 8
         return np.ceil(binary_size//self.N)
 
-    def binseq2int(self,seq): #binnary sequence 2 int 
-        return BitArray(seq[:]).uint
-
-
-
-    def decapsulate(self,enc_bits,out_data,out_p_type,out_p_id,out_f_type,out_f_id,out_f_size):  
-        out_data[:]=enc_bits[0,self.INFO_SIZE:]
-        out_p_type[:]=self.binseq2int(enc_bits[0,:2])
-        out_p_id[:]=self.binseq2int(enc_bits[0,2:18])
-        out_f_id[:]=self.binseq2int(enc_bits[0,18:34])
-        out_f_type[:]=self.binseq2int(enc_bits[0,34:36])
-        out_f_size[:]=self.binseq2int(enc_bits[0,36:60])
-        return 0
-
 
     def __init__(self, path, N,auto_reset=False):
         Py_Module.__init__(self)
@@ -117,13 +103,4 @@ class source_file(Py_Module):
         self.create_codelet(t_generate, lambda slf, lsk,
                             fid: slf.generate(lsk[_out],lsk[nb],lsk[id]))
 
-        dt_dec = self.create_task("decapsulate")
-        b_in_dec= self.create_socket_in (dt_dec, "IN", self.N+self.INFO_SIZE, np.int32)  #preferably input window should be smaller thacn frame size bigger than data size
-        b_out_dec= self.create_socket_out(dt_dec,"OUT", self.N, np.int32)   #return frame size
-        b_p_type= self.create_socket_out(dt_dec,"p_type", 1, np.int32)
-        out_p_id= self.create_socket_out(dt_dec,"Packet_ID", 1, np.int32)
-        out_f_id= self.create_socket_out(dt_dec,"Frame_ID", 1, np.int32)
-        out_f_type= self.create_socket_out(dt_dec,"out_f_type", 1, np.int32)
-        out_f_size= self.create_socket_out(dt_dec,"out_f_size", 1, np.int32)
-
-        self.create_codelet(dt_dec, lambda slf, lsk, fid: slf.decapsulate(lsk[b_in_dec],lsk[b_out_dec],lsk[b_p_type],lsk[out_p_id],lsk[out_f_type],lsk[out_f_id],lsk[out_f_size]))
+        

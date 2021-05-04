@@ -20,6 +20,7 @@ import scrambler
 import detect_coming_trame
 import float_to_int
 import source_file
+import decapsulation
 
 process=None
 
@@ -77,14 +78,14 @@ noise = estimateur_bruit.Estimateur_bruit(2*(Ns+h),0.01)
 mdm = py_aff3ct.module.modem.Modem_BPSK_fast(N)
 dec = py_aff3ct.module.decoder.Decoder_repetition_std(HK,N)
 scramb = scrambler.scrambler(HK,"scramble")
-dcp = source_file.source_file(None,K,auto_reset=False)
+dcp = decapsulation.decapsulation(K)
 
 detector_file = detect_coming_trame.detect_coming_trame(K)
 itr_writing = eirballoon.interrupteur.Interrupteur(K)
 
 converter = float_to_int.f2i(K)
 
-snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.jpeg')
+snk = py_aff3ct.module.sink.Sink_user_binary(K, 'toto.ts')
 
 
 display = py_display.Display(2*(Ns+h),10)
