@@ -31,7 +31,7 @@ class source_file(Py_Module):
     def build_info_header(self): #updates info header   
         
         #set file type
-        if (os.path.splitext(self.path)==".ts"):
+        if (".ts" in self.path):
             self.F_TYPE=0
         else:
             self.F_TYPE=1
@@ -43,13 +43,17 @@ class source_file(Py_Module):
         self.INFO=list(self.int2binseq(self.PACKET_TYPE,2))+list(self.int2binseq(self.PACKET_ID,16))+list(self.int2binseq(self.F_ID,16))+list(self.int2binseq(self.F_TYPE,2))+list(self.int2binseq(self.F_SIZE,24))
         return 0
 
-    def generate(self,_out,nb,id):
-        if self.tmp == 1:
-            pass
-        if self.frame_nb < 50:
+    def generate(self,_out,nb,id,type):
+        if self.tmp > 0:
+            self.tmp+=1
+            if self.tmp == 300:
+                exit(0)
+            else:
+                pass
+        if self.frame_nb < 100:
             _out[0,::2]=np.ones((1,(self.N+self.INFO_SIZE)//2),dtype=np.int32)
             _out[0,1::2]=np.zeros((1,(self.N+self.INFO_SIZE)//2),dtype=np.int32)
-        elif self.frame_nb==50:
+        elif self.frame_nb==100:
             _out[0,::]=np.ones((1,self.N+self.INFO_SIZE),dtype=np.int32)
             
         else:
@@ -58,6 +62,7 @@ class source_file(Py_Module):
             self.src('generate').exec()
             nb[:]=self.number_packet
             id[:]=self.PACKET_ID
+            type[:]=self.F_TYPE
             self.update_attr()
             if self.PACKET_TYPE == 2:
                 self.tmp = 1
@@ -81,10 +86,7 @@ class source_file(Py_Module):
         self.frame_nb = 1
         self.name = "source_file"
         self.tmp=0
-        if path:
-            self.number_packet = self.compute_packet_number()
-        else: 
-            self.number_packet = 0
+        self.number_packet = self.compute_packet_number()
         #infos
         self.F_ID=0 #16 bits, file id (65536 file)
         self.F_TYPE=0 #1 bit , file type (0 .Ts file, 1 img any type
@@ -93,14 +95,14 @@ class source_file(Py_Module):
         self.PACKET_TYPE=0 #2 bits to encode 3 types of frames ;1 start// 0 mid// 2 end// 
         #total 59 bits ########## [P_TYPE P_ID F_ID F_TYPE F_SIZE]
         self.INFO_SIZE=60
-        if path:
-            self.build_info_header()
+        self.build_info_header()
 
         t_generate = self.create_task('generate')
         _out = self.create_socket_out(t_generate, 'U_K', N+self.INFO_SIZE, np.int32)
         nb = self.create_socket_out(t_generate, 'NB', 1, np.int32)
         id = self.create_socket_out(t_generate, 'ID', 1, np.int32)
+        type = self.create_socket_out(t_generate,"type",1,np.int32)
         self.create_codelet(t_generate, lambda slf, lsk,
-                            fid: slf.generate(lsk[_out],lsk[nb],lsk[id]))
+                            fid: slf.generate(lsk[_out],lsk[nb],lsk[id],lsk[type]))
 
         
