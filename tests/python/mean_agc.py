@@ -17,7 +17,7 @@ class Mean_Agc(Py_Module):
             gain = ref/np.sqrt(y)
             itr = 0
         else:
-            gain = gain_
+            gain = 1
             itr = 1
         return gain, amp_in*gain, itr
 
@@ -26,7 +26,7 @@ class Mean_Agc(Py_Module):
         # self.gain = gain_ #* 0.9+0.1*self.gain
         ref = self.ref
         gain, tmp, itr[0,0] = Mean_Agc.ampli_(amp_in, ref,self.gain)
-        self.gain = gain *0.3 + 0.7 * self.gain
+        self.gain = gain *0.8 + 0.2 * self.gain
         amp_out[:] = tmp
         gain_out[:] = self.gain
         return 0
