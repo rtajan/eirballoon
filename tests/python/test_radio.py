@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import eirballoon
 import py_aff3ct
-from os import remove
+import os
 import sys
 sys.path.insert(0, '../../build/lib')
 sys.path.insert(0, '../../py_aff3ct/build/lib')
@@ -38,9 +38,19 @@ def signal_handler(sig, frame):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("name", type=str)
+    parser.add_argument("file", type=str)  # fichier d'enregistrement
     parser.add_argument("--fech", type=int, default=0.5e6)
     args = parser.parse_args()
+
+    ###Creation du dossier d'enregistrement###
+    path = "./"+args.file
+    try:
+        os.mkdir(path)
+    except OSError:
+        print("Les images et vidéos seront enregistrées ici : %s " % path)
+    else:
+        print("Les images et vidéos seront enregistrées ici : %s " % path)
+
 
     H = 60  # taille du Header
     K = 8*188  # nombre de bits utiles
@@ -88,15 +98,15 @@ if __name__ == "__main__":
     scramb = scrambler.scrambler(HK, "scramble")
     dcp = decapsulation.decapsulation(K)
 
-    detector_file = detect_coming_trame.detect_coming_trame(K)
-    itr_writing = eirballoon.interrupteur.Interrupteur_i(K)
+    detector_file = detect_coming_trame.detect_coming_trame(K,path)
+    # itr_writing = eirballoon.interrupteur.Interrupteur_i(K)
 
     # itr = eirballoon.interrupteur.Interrupteur(K)
     # itr_jpeg = eirballoon.interrupteur.Interrupteur(K)
 
     # converter_jpeg = float_to_int.f2i(K)
     # snk_jpeg = py_aff3ct.module.sink.Sink_user_binary(K, args.name+".jpeg")
-    snk = py_aff3ct.module.sink.Sink_user_binary(K, args.name)##+".ts")
+    # snk = py_aff3ct.module.sink.Sink_user_binary(K, args.name)  # +".ts")
 
     display = py_display.Display(2*(Ns+h), 5)
     info = display_info.display_info(1)
@@ -162,18 +172,19 @@ if __name__ == "__main__":
     dcp["decapsulate::IN"].bind(scramb["scramble::Y_N"])
     detector_file['detect::X_N'].bind(dcp["decapsulate::OUT"])
     detector_file['detect::end_packet'].bind(dcp["decapsulate::p_type"])
-    itr_writing["select::bln"].bind(detector_file["detect::itr"])
-    itr_writing["select::X_N"].bind(detector_file["detect::Y_N"])
-    snk['send::V'].bind(itr_writing['select::Y_N'])
+    detector_file['detect::T_Type'].bind(dcp['decapsulate::out_f_type'])
+    # itr_writing["select::bln"].bind(detector_file["detect::itr"])
+    # itr_writing["select::X_N"].bind(detector_file["detect::Y_N"])
+    # snk['send::V'].bind(itr_writing['select::Y_N'])
     # converter['convert::X_N'].bind(detector_file["detect::Y_N"])
     # converter_ts['convert::X_N'].bind(itr_writing["select::Y_N"])
-    #itr_ts["select::bln"].bind(dcp["decapsulate::ts_type"])
+    # itr_ts["select::bln"].bind(dcp["decapsulate::ts_type"])
     # itr_jpeg["select::bln"].bind(dcp["decapsulate::jpeg_type"])
 
-    #itr_ts["select::X_N"].bind(itr_writing["select::Y_N"])
+    # itr_ts["select::X_N"].bind(itr_writing["select::Y_N"])
     # itr_jpeg["select::X_N"].bind(itr_writing["select::Y_N"])
 
-    #converter_ts['convert::X_N'].bind(itr_ts["select::Y_N"])
+    # converter_ts['convert::X_N'].bind(itr_ts["select::Y_N"])
     # converter_jpeg['convert::X_N'].bind(itr_jpeg["select::Y_N"])
     # snk_jpeg['send::V'].bind(converter_jpeg['convert::Y_N'])
     # snk['send::V'].bind(scramb["scramble::Y_N"])
@@ -183,8 +194,8 @@ if __name__ == "__main__":
     sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"))
     #fr_syn("tr_synchronize").debug = True
     # sequence = py_aff3ct.tools.sequence.Sequence(radio("receive"),dec('decode_siho'))
-    amp("amplify").debug = True
-    amp("amplify").set_debug_limit(1)
+    # amp("amplify").debug = True
+    # amp("amplify").set_debug_limit(1)
     l_tasks = sequence.get_tasks_per_types()
     for lt in l_tasks:
         for t in lt:
