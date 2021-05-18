@@ -39,7 +39,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=str)  # fichier d'enregistrement
-    parser.add_argument("--fech", type=int, default=0.5e6)
+    parser.add_argument("-f","--fech", type=int, default=1e6)
+    parser.add_argument("-d","--display",action="store_true")
     args = parser.parse_args()
 
     ###Creation du dossier d'enregistrement###
@@ -108,7 +109,7 @@ if __name__ == "__main__":
     # snk_jpeg = py_aff3ct.module.sink.Sink_user_binary(K, args.name+".jpeg")
     # snk = py_aff3ct.module.sink.Sink_user_binary(K, args.name)  # +".ts")
 
-    display = py_display.Display(2*(Ns+h), 5)
+    display = py_display.Display(2*(Ns+h), ref+1)
     info = display_info.display_info(1)
 
     info.bind_display(dcp["decapsulate::Packet_ID"])
@@ -160,7 +161,9 @@ if __name__ == "__main__":
     mdm["demodulate::Y_N1"].bind(pre["remove_preamble::s_out"])
     # display['plot::x'].bind(sync_fine['synchronize::sync_out'])
     # display['plot::x'].bind(correc_phase["sync::Y_N"])
-    # display['plot::x'].bind(fr_syn['tr_synchronize::OUT'])
+    if(args.display):
+        display['plot::x'].bind(fr_syn['tr_synchronize::OUT'])
+
     # display['plot::x'].bind(pre["remove_preamble::s_out"])
 
     # CP = np.array([[1]],dtype=np.float32)

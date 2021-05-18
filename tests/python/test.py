@@ -22,12 +22,14 @@ process=None
 def signal_handler(sig, frame):
     sequence.show_stats()
     sequence.export_dot("seq.dot")
+    radio.stop_tx()
     raise RuntimeError
 
 if __name__ == "__main__":
     parser =  argparse.ArgumentParser()
     parser.add_argument("name",type=str)
-    parser.add_argument("--fech",type=int,default=0.5e6)
+    parser.add_argument("-f","--fech",type=float,default=1)
+    parser.add_argument("-d","--display",action="store_true")
     args = parser.parse_args()
 
     N= 8*188
@@ -45,23 +47,33 @@ if __name__ == "__main__":
     pre = preamble.preamble(P,Nenc)
     h   = eirballoon.filter.Filter_root_raised_cosine.synthetize(0.7,2,20)
     flt = eirballoon.filter.Filter_UPFIR(Nenc+2*P,h,2)
+    
 
     amp = test_ampli.test_ampli(0.7,K)
     
 
-    fech = args.fech
+    fech = args.fech*1e6
 
-    usrp_params = eirballoon.radio.USRP_params()
-    usrp_params.N          = K//2
-    usrp_params.threaded   = True
-    usrp_params.usrp_addr  = "type=b100"
-    usrp_params.tx_enabled = True
-    usrp_params.tx_rate    = fech
-    usrp_params.fifo_size  = 100000
-    usrp_params.tx_antenna = "TX/RX"
-    usrp_params.tx_freq    = 2450e6
+    hrfp = eirballoon.radio.HACKRF_params()
+    hrfp.N = K//2
+    hrfp.fifo_size = 100
+    hrfp.rx_rate = fech
+    hrfp.rx_freq = 2450e6
+    hrfp.tx_rate =  fech
+    radio = eirballoon.radio.Radio_HACKRF(hrfp)
 
-    radio   = eirballoon.radio.Radio_USRP(usrp_params)
+    # usrp_params = eirballoon.radio.USRP_params()
+    # usrp_params.N          = K//2
+    # usrp_params.threaded   = True
+    # usrp_params.usrp_addr  = "type=b100"
+    # usrp_params.tx_enabled = True
+    # usrp_params.tx_rate    = fech
+    # usrp_params.fifo_size  = 100000
+    # usrp_params.tx_antenna = "TX/RX"
+    # usrp_params.tx_freq    = 2450e6
+
+    # radio   = eirballoon.radio.Radio_USRP(usrp_params)
+    f2i = eirballoon.converter.Converter_f2i(hrfp.N*2)
     display = py_display.Display(K,2)
 
 
@@ -71,8 +83,13 @@ if __name__ == "__main__":
     pre['insert_preamble::s_in'].bind(mod['modulate::X_N2'])
     flt[  'filter::X_N1'].bind(pre['insert_preamble::s_out'])
     amp['amplify::amp_in'].bind(flt['filter::Y_N2'])
-    radio['send::X_N1'].bind(amp['amplify::amp_out'])
-    display['plot::x'].bind(amp['amplify::amp_out'])
+    f2i  ["convert::X_N" ].bind(amp['amplify::amp_out'])
+    radio['send::X_N1'].bind(f2i["convert::Y_N"])
+    # radio['send::X_N1'].bind(amp['amplify::amp_out'])
+
+
+    if args.display:
+        display['plot::x'].bind(amp['amplify::amp_out'])
     inf = display_info.display_info(dc=10)
     inf.bind_display(src['generate::NB'])
     inf.bind_display(src['generate::ID'])
@@ -92,7 +109,7 @@ if __name__ == "__main__":
 
 
     signal.signal(signal.SIGINT, signal_handler)
-
+    radio.start_tx()
     sequence.exec()
     sequence.show_stats()
 # src('generate').exec()

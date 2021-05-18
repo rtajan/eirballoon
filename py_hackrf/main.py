@@ -32,26 +32,26 @@ from inspect import getmembers, isfunction
 from sched_tasks import Task
 from os import path
 
-def isfifo(self,fn):
-    #check if the pipe already exists
-            return stat.S_ISFIFO(os.stat(fn).st_mode)
+# def isfifo(self,fn):
+#     #check if the pipe already exists
+#             return stat.S_ISFIFO(os.stat(fn).st_mode)
 
-class amp:
-    #complete this class!!!
-    power = 0
-    def amp_on(self):
-        #mettre le bit à 1
-        self.power = 1
-        #pause 100us
-        time.sleep(0.0100)
-        print("ampli allumé")
+# class amp:
+#     #complete this class!!!
+#     power = 0
+#     def amp_on(self):
+#         #mettre le bit à 1
+#         self.power = 1
+#         #pause 100us
+#         time.sleep(0.0100)
+#         print("ampli allumé")
 
-    def amp_off(self):
-        #mettre le bit à 0
-        self.power = 0
-        #pause 130us
-        time.sleep(0.0130)
-        print("ampli éteint")
+#     def amp_off(self):
+#         #mettre le bit à 0
+#         self.power = 0
+#         #pause 130us
+#         time.sleep(0.0130)
+#         print("ampli éteint")
 
 class Start:
     '''Main class in scheduler '''
@@ -123,17 +123,14 @@ if __name__ == "__main__":
         '''
         TaskObjs=[]
         for all_tasks in data.values():
-
-                task=all_tasks[0] # --> task_n
-                #initialisation des objets Task
-
-                currentTask=Task()
-                currentTask.initialize(task["task_name"], task['task_args'][0], task['task_offset'] )
-
-                #args reformatting
-                currentTask.TaskArgs.update(envvar)
-                #executing task routine
-                currentTask.exec(currentTask.TaskArgs)
-                StartObj.sched_sleep(currentTask.offset)
-
-        StartObj.fichier_log.close()
+            task=all_tasks[0] # --> task_n
+            #initialisation des objets Tas
+            currentTask=Task()
+            currentTask.initialize(task["task_name"], task['task_args'][0], task['task_offset'])
+            #args reformatting
+            currentTask.TaskArgs.update(envvar)
+             #executing task routine
+            currentTask.exec(currentTask.TaskArgs)
+            StartObj.sched_sleep(currentTask.offset)
+         
+    StartObj.fichier_log.close()

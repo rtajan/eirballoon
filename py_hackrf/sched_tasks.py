@@ -2,7 +2,8 @@ import json
 import os
 import time 
 from datetime import datetime
-import json
+import cv2
+import imutils
 import stat
 from os import path
 from inspect import getmembers, isfunction
@@ -46,10 +47,16 @@ class Task:
             return
         def take_photo(self,args_dict):
             #prendre une photo
+            cap = cv2.VideoCapture(2)
+            ret, frame = cap.read()
+            (grabbed, frame) = cap.read()
+            time.sleep(0.3) # Wait 300 miliseconds
+            image = args_dict["MediaFilePath"]+"Image_"+datetime.now().strftime("%H:%M:%S")+".jpeg"
+            cv2.imwrite(image, frame)
+            cap.release()
             
+            args_dict["LogFile"].write(datetime.now().strftime("%H:%M:%S")+": Taking photo"+image+"\n")
             
-            filename=args_dict["MediaFilePath"]+"Image_N.jpeg"
-            args_dict["LogFile"].write(datetime.now().strftime("%H:%M:%S")+": Taking photo"+"\n")
             
 
             
@@ -57,8 +64,9 @@ class Task:
         def record(self, args_dict):
             #prendre une video
             # add
-            filename=args_dict["MediaFilePath"]+"Vid_N.mp4"
 
+            filename=args_dict["MediaFilePath"]+"Vid_"+datetime.now().strftime("%H:%M:%S")+".ts"
+            os.system('ffmpeg -f v4l2 -framerate 10 -video_size 1280x720 -t '+str(args_dict["vid_sec"])+' -i /dev/video2 ' + filename)
             args_dict["LogFile"].write(datetime.now().strftime("%H:%M:%S")+": Taking video for "+str(args_dict["vid_sec"])+" seconds"+"\n")
 
             
