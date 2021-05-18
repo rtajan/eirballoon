@@ -1,4 +1,4 @@
-15:47:27 Starting Task Scheduling Log 
-15:47:27: Taking video for 4 seconds
-15:47:31: Taking photo
-15:47:33: Taking photo
+15:45:02 Starting Task Scheduling Log 
+15:45:07: Taking video for 4 seconds
+15:45:12: Taking photo/home/virgil/grosBallon/eirballoon/py_hackrf/mediaImage_15:45:12.jpeg
+15:45:15: Taking photo/home/virgil/grosBallon/eirballoon/py_hackrf/mediaImage_15:45:15.jpeg
