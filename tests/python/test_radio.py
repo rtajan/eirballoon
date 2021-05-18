@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file", type=str)  # fichier d'enregistrement
-    parser.add_argument("--fech", type=int, default=1e6)
+    parser.add_argument("-f","--fech", type=int, default=1e6)
     parser.add_argument("-d","--display",action="store_true")
     args = parser.parse_args()
 
