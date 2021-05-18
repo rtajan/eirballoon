@@ -46,7 +46,7 @@ class source_file(Py_Module):
     def generate(self,_out,nb,id,type):
         if self.tmp > 0:
             self.tmp+=1
-            if self.tmp == 300:
+            if self.tmp == 500:
                 exit(0)
             else:
                 pass
