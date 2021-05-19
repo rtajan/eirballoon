@@ -1,0 +1,51 @@
+{
+    "task1":[
+    
+    {
+    "task_name": "record",
+    "task_args": [
+        { "vid_sec": "4"}
+     ],
+    "task_offset":"4"
+    }
+],
+
+    "task2":[
+    
+    {
+    "task_name": "take_photo",
+    "task_args": [
+        { "arg_1": "" },
+        { "arg_2": "" }
+     ],
+    "task_offset":"2"
+    }
+],
+
+"task3":[
+    
+    {
+    "task_name": "create_pipe",
+    "task_args": [
+        { "arg_1": "" },
+        { "arg_2": "" }
+     ],
+    "task_offset":"0"
+    }
+]
+,
+
+"task4":[
+    
+    {
+    "task_name": "take_photo",
+    "task_args": [
+        { "arg_1": "" },
+        { "arg_2": "" }
+     ],
+    "task_offset":"0"
+    }
+]
+
+   
+}
