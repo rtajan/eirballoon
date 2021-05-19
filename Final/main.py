@@ -77,9 +77,9 @@ class Start:
         self.path=str_abs_path
         ##############################################################################################
 
-        self.mediaFilePath=self.path+"py_hackrf/media"
-        self.pipe_path=self.path+"py_hackrf/py_pipe"
-        self.path_log=self.path+"py_hackrf/log_tasks.txt"
+        self.mediaFilePath=self.path+"Final/media"
+        self.pipe_path=self.path+"Final/py_pipe"
+        self.path_log=self.path+"Final/log_tasks.txt"
 
        #creating log file
         self.fichier_log=open(self.path_log, "w")
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     #dictionary containing global variables
     envvar={"MediaFilePath":StartObj.mediaFilePath, "LogFile":StartObj.fichier_log }
 
-    with open(StartObj.path+'py_hackrf/tasks.json') as json_file:
+    with open(StartObj.path+'Final/tasks.json') as json_file:
         data = json.load(json_file)
         '''
         from now on the only tasks executed are the tasks on the JSON file
