@@ -122,8 +122,8 @@ if __name__ == "__main__":
 
         '''
         TaskObjs=[]
-        while True :
-            for all_tasks in data.values():
+        # while True :
+        for all_tasks in data.values():
                 task=all_tasks[0] # --> task_n
                 #initialisation des objets Tas
                 currentTask=Task()

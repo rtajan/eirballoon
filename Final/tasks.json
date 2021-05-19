@@ -1,27 +1,45 @@
 {
+
     "task1":[
+    
+        {
+        "task_name": "take_photo",
+        "task_args": [
+            { "arg_1": "" },
+            { "arg_2": "" }
+         ],
+        "task_offset":"2"
+        }
+    ],
+
+    "task2":[
+    
+        {
+        "task_name": "take_photo",
+        "task_args": [
+            { "arg_1": "" },
+            { "arg_2": "" }
+         ],
+        "task_offset":"2"
+        }
+    ],
+
+
+
+
+    "task3":[
     
     {
     "task_name": "record",
     "task_args": [
-        { "vid_sec": "120"}
+        { "vid_sec": "60"}
      ],
-    "task_offset":"130"
+    "task_offset":"70"
     }
 ],
 
-    "task2":[
-    
-    {
-    "task_name": "take_photo",
-    "task_args": [
-        { "arg_1": "" },
-        { "arg_2": "" }
-     ],
-    "task_offset":"2"
-    }
-],
-,
+ 
+
 
 "task4":[
     
