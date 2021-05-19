@@ -122,15 +122,16 @@ if __name__ == "__main__":
 
         '''
         TaskObjs=[]
-        for all_tasks in data.values():
-            task=all_tasks[0] # --> task_n
-            #initialisation des objets Tas
-            currentTask=Task()
-            currentTask.initialize(task["task_name"], task['task_args'][0], task['task_offset'])
-            #args reformatting
-            currentTask.TaskArgs.update(envvar)
-             #executing task routine
-            currentTask.exec(currentTask.TaskArgs)
-            StartObj.sched_sleep(currentTask.offset)
+        while True :
+            for all_tasks in data.values():
+                task=all_tasks[0] # --> task_n
+                #initialisation des objets Tas
+                currentTask=Task()
+                currentTask.initialize(task["task_name"], task['task_args'][0], task['task_offset'])
+                #args reformatting
+                currentTask.TaskArgs.update(envvar)
+                #executing task routine
+                currentTask.exec(currentTask.TaskArgs)
+                StartObj.sched_sleep(currentTask.offset)
          
     StartObj.fichier_log.close()

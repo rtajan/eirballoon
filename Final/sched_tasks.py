@@ -57,6 +57,7 @@ class Task:
             
             args_dict["LogFile"].write(datetime.now().strftime("%H:%M:%S")+": Taking photo"+image+"\n")
             os.system("python3 test.py " + image)
+            os.system("rm "+image)
             
             
 
@@ -70,6 +71,7 @@ class Task:
             os.system('ffmpeg -f v4l2 -framerate 10 -video_size 1280x720 -t '+str(args_dict["vid_sec"])+' -i /dev/video0 ' + filename)
             args_dict["LogFile"].write(datetime.now().strftime("%H:%M:%S")+": Taking video for "+str(args_dict["vid_sec"])+" seconds"+"\n")
             os.system("python3 test.py " + filename)
+            os.system("rm "+filename)
             
             
         def start_aff3ct(self, args_dict):

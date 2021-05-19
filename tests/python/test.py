@@ -3,7 +3,6 @@ import sys
 sys.path.insert(0, '../../build/lib')
 sys.path.insert(0, '../../py_aff3ct/build/lib')
 sys.path.insert(0, '../../src/python')
-import py_display
 import py_aff3ct
 import eirballoon
 import display_info
@@ -29,7 +28,6 @@ if __name__ == "__main__":
     parser =  argparse.ArgumentParser()
     parser.add_argument("name",type=str)
     parser.add_argument("-f","--fech",type=float,default=1)
-    parser.add_argument("-d","--display",action="store_true")
     args = parser.parse_args()
 
     N= 8*188
@@ -74,7 +72,6 @@ if __name__ == "__main__":
 
     # radio   = eirballoon.radio.Radio_USRP(usrp_params)
     f2i = eirballoon.converter.Converter_f2i(hrfp.N*2)
-    display = py_display.Display(K,2)
 
 
     scb["scramble::X_N"].bind(src['generate::U_K' ])
@@ -88,8 +85,6 @@ if __name__ == "__main__":
     # radio['send::X_N1'].bind(amp['amplify::amp_out'])
 
 
-    if args.display:
-        display['plot::x'].bind(amp['amplify::amp_out'])
     inf = display_info.display_info(dc=10)
     inf.bind_display(src['generate::NB'])
     inf.bind_display(src['generate::ID'])
