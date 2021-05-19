@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # display['plot::x'].bind(pre["remove_preamble::s_out"])
 
     # CP = np.array([[1]],dtype=np.float32)
-    noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
+    # noise['estimate::y'].bind(fr_syn['tr_synchronize::OUT'])
     mdm['demodulate::CP'].bind(noise['estimate::cp'])
     # mdm['demodulate::CP'].bind(CP)
     dec['decode_siho::Y_N'].bind(mdm['demodulate::Y_N2'])
