@@ -2,7 +2,7 @@
 
 This repository contains a student code for QPSK modulation and demodulation using py_aff3ct and Software Defined Radios (SDRs). 
 
-## Pre-requisite
+## Prerequisite
 
 The first step is to fetch every submodule in this project.
 
