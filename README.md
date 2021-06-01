@@ -8,7 +8,7 @@ The first step is to fetch every submodule in this project.
 
 	$ git submodule update --init --recursive
 
-Then, compile `py_aff3ct` on Linux/MacOS/MinGW following [the README.md file](./py_aff3ct/README.md) in the `py_aff3ct` folder.
+Then, compile `py_aff3ct` on Linux/MacOS/MinGW following [the README.md file](https://github.com/aff3ct/py_aff3ct/tree/d3a053a6180f303cbb55cbbf450aabc3bba202ec) of the `py_aff3ct` folder.
 
 ## Compile your code
 
